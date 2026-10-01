@@ -71,6 +71,10 @@ namespace VinXiangQi
             {
                 name = isRed ? "兵" : "卒";
             }
+            else if (name == "anzi")
+            {
+                name = "暗";
+            }
             return name;
         }
 
@@ -207,7 +211,7 @@ namespace VinXiangQi
             return string.Join(" ", moves);
         }
 
-        public static BoardCompareResult CompareBoard(string[,] from, string[,] to)
+        public static BoardCompareResult CompareBoard(string[,] from, string[,] to, bool fuzzyDark = false)
         {
             BoardCompareResult result = new BoardCompareResult();
             int diffCount = 0;
@@ -240,7 +244,13 @@ namespace VinXiangQi
                     {
                         rToCount++;
                     }
-                    if (from[x, y] != to[x, y])
+                    bool cellEqual = (from[x, y] == to[x, y]);
+                    if (!cellEqual && fuzzyDark && IsDarkPiece(from[x, y]) && !IsDarkPiece(to[x, y]) && SameSide(from[x, y], to[x, y]))
+                    {
+                        // 揭棋：上一次推断该格为暗子，新检测同格为同色明子（暗子翻开后的真实身份），视为同一棋子，不计入差异
+                        cellEqual = true;
+                    }
+                    if (!cellEqual)
                     {
                         if (to[x, y] == null)
                         {
@@ -261,6 +271,39 @@ namespace VinXiangQi
             result.BlackDiff = bFromCount - bToCount;
             result.DiffCount = diffCount;
             return result;
+        }
+
+        // 是否为暗子格（揭棋：dark / b_anzi / r_anzi）
+        public static bool IsDarkPiece(string cell)
+        {
+            if (string.IsNullOrEmpty(cell)) return false;
+            return cell == "dark" || cell.EndsWith("_anzi");
+        }
+
+        // 两个棋子名是否属于同一方
+        public static bool SameSide(string a, string b)
+        {
+            if (string.IsNullOrEmpty(a) || string.IsNullOrEmpty(b)) return false;
+            return a.Substring(0, 1) == b.Substring(0, 1);
+        }
+
+        // 对比上一次推断的棋盘，列出"暗子翻开成什么"（用于状态栏提示）
+        public static string DescribeReveals(string[,] from, string[,] to)
+        {
+            if (from == null || to == null) return "";
+            string text = "";
+            for (int y = 0; y < 10; y++)
+            {
+                for (int x = 0; x < 9; x++)
+                {
+                    if (IsDarkPiece(from[x, y]) && to[x, y] != null && !IsDarkPiece(to[x, y]) && SameSide(from[x, y], to[x, y]))
+                    {
+                        if (text != "") text += "、";
+                        text += "行" + y + "列" + x + "翻开=" + nameToChina(to[x, y]);
+                    }
+                }
+            }
+            return text;
         }        
 
         public static string BoardToFen(string[,] Board, bool redSide)
@@ -295,7 +338,9 @@ namespace VinXiangQi
                                 emptyCount = 0;
                             }
                             string[] nameInfo = Board[x, y].Split('_');
-                            if (nameInfo[0] == "r") fen += FenMap[nameInfo[1]].ToUpper();
+                            if (nameInfo.Length < 2) continue;
+                            if (nameInfo[1] == "anzi" || nameInfo[1] == "dark") fen += (nameInfo[0] == "r") ? "X" : "x";
+                            else if (nameInfo[0] == "r") fen += FenMap[nameInfo[1]].ToUpper();
                             else fen += FenMap[nameInfo[1]];
                         }
                     }
@@ -325,7 +370,9 @@ namespace VinXiangQi
                                 emptyCount = 0;
                             }
                             string[] nameInfo = Board[x, y].Split('_');
-                            if (nameInfo[0] == "r") fen += FenMap[nameInfo[1]].ToUpper();
+                            if (nameInfo.Length < 2) continue;
+                            if (nameInfo[1] == "anzi" || nameInfo[1] == "dark") fen += (nameInfo[0] == "r") ? "X" : "x";
+                            else if (nameInfo[0] == "r") fen += FenMap[nameInfo[1]].ToUpper();
                             else fen += FenMap[nameInfo[1]];
                         }
                     }
@@ -339,7 +386,53 @@ namespace VinXiangQi
             }
             
             fen = fen.Substring(0, fen.Length - 1) + " " + nextPlayer;
+            if (Mainform.Settings.JieqiMode)
+            {
+                // 揭棋：追加暗子池（初始 2/2/2/2/2/5 减盘面明子，按类不低于 0），格式 board side pocket 0 1
+                string pocket = GetJieqiPocket(Board);
+                if (pocket != "") fen += " " + pocket + " 0 1";
+            }
             return fen;
+        }
+
+        // 揭棋暗子池：按类型统计"初始数量 - 盘面明子数"，clamp 0，省略零计数
+        public static string GetJieqiPocket(string[,] Board)
+        {
+            Dictionary<string, string> FenMap = new Dictionary<string, string>
+            {
+                { "che", "r" }, { "ma", "n" }, { "xiang", "b" }, { "shi", "a" }, { "pao", "c" }, { "bing", "p" }
+            };
+            Dictionary<string, int> initial = new Dictionary<string, int>
+            {
+                { "R", 2 }, { "N", 2 }, { "B", 2 }, { "A", 2 }, { "C", 2 }, { "P", 5 },
+                { "r", 2 }, { "n", 2 }, { "b", 2 }, { "a", 2 }, { "c", 2 }, { "p", 5 }
+            };
+            Dictionary<string, int> visible = new Dictionary<string, int>();
+            if (Board != null)
+            {
+                for (int y = 0; y < 10; y++)
+                {
+                    for (int x = 0; x < 9; x++)
+                    {
+                        string cell = Board[x, y];
+                        if (string.IsNullOrEmpty(cell) || !cell.Contains("_")) continue;
+                        string[] nameInfo = cell.Split('_');
+                        if (nameInfo.Length < 2 || !FenMap.ContainsKey(nameInfo[1])) continue;
+                        string letter = FenMap[nameInfo[1]];
+                        if (nameInfo[0] == "r") letter = letter.ToUpper();
+                        if (visible.ContainsKey(letter)) visible[letter]++;
+                        else visible.Add(letter, 1);
+                    }
+                }
+            }
+            string pocket = "";
+            foreach (string letter in new string[] { "R", "N", "B", "A", "C", "P", "r", "n", "b", "a", "c", "p" })
+            {
+                int count = initial[letter] - (visible.ContainsKey(letter) ? visible[letter] : 0);
+                if (count < 0) count = 0;
+                if (count > 0) pocket += letter + count.ToString();
+            }
+            return pocket;
         }
 
         public static string MirrorFenLeftRight(string fen)
@@ -398,6 +491,11 @@ namespace VinXiangQi
             string[] args = chess.Split('_');
             string side = args[0];
             string type = args[1];
+            if (Mainform.Settings.JieqiMode && type != "jiang")
+            {
+                // 揭棋：翻开的士/象/卒可能出现在非标准位置（移动后翻开），跳过站位检查
+                return true;
+            }
             if (!redSide)
             {
                 y = 9 - y;
@@ -505,7 +603,8 @@ namespace VinXiangQi
                 { "xiang", 2 },
                 { "shi", 2 },
                 { "jiang", 1 },
-                { "bing", 5 }
+                { "bing", 5 },
+                { "anzi", 15 }
             };
             for (int y = 0; y < 10; y++)
             {
@@ -532,7 +631,7 @@ namespace VinXiangQi
             foreach (var c in counts)
             {
                 string type = c.Key.Split('_')[1];
-                if (c.Value > maxCounts[type])
+                if (maxCounts.ContainsKey(type) && c.Value > maxCounts[type])
                 {
                     return false;
                 }

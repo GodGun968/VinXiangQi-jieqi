@@ -133,6 +133,12 @@
   <data name="b_jiang" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\b_jiang.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="b_anzi" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\b_anzi.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="r_anzi" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\r_anzi.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="b_ma" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\b_ma.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>

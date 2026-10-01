@@ -36,6 +36,7 @@ namespace VinXiangQi
         // 棋盘识别模型
         public static Dictionary<string, YoloScorer<YoloXiangQiModel>> ModelList = new Dictionary<string, YoloScorer<YoloXiangQiModel>>();
         public static YoloScorer<YoloXiangQiModel> Model;
+        public static JieqiDetector JieqiModel = null;
         // UCI引擎封装
         public static EngineHelper Engine;
         // 开局库
@@ -203,6 +204,19 @@ namespace VinXiangQi
                 if (file.EndsWith(".onnx"))
                 {
                     string modelName = file.Split('\\').Last().Replace(".onnx", "");
+                    if (modelName == "jieqi")
+                    {
+                        // 揭棋模型为 YOLO11 输出格式，不能走 Yolov5Net 解码路径，单独加载
+                        try
+                        {
+                            JieqiModel = new JieqiDetector(file);
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine("揭棋模型加载失败: " + ex.ToString());
+                        }
+                        continue;
+                    }
                     var model = new YoloScorer<YoloXiangQiModel>(file);
                     ModelList.Add(modelName, model);
                     if (Settings.YoloModel == modelName)
@@ -320,6 +334,8 @@ namespace VinXiangQi
             checkBox_auto_click.Checked = Settings.AutoClick;
             // 绝杀自动立即走棋
             checkBox_stop_when_mate.Checked = Settings.StopWhenMate;
+            // 揭棋模式
+            checkBox_jieqi_mode.Checked = Settings.JieqiMode;
             // 自动走棋分数
             numericUpDown_stop_score.Value = (decimal)Settings.StopScore;
             // Yolo模型选择
@@ -998,6 +1014,16 @@ namespace VinXiangQi
         {
             Settings.StopWhenMate = checkBox_stop_when_mate.Checked;
             SaveSettings();
+        }
+
+        private void checkBox_jieqi_mode_CheckedChanged(object sender, EventArgs e)
+        {
+            Settings.JieqiMode = checkBox_jieqi_mode.Checked;
+            SaveSettings();
+            if (checkBox_jieqi_mode.Checked && JieqiModel == null)
+            {
+                MessageBox.Show("未找到或无法加载揭棋模型，请确认 Models 目录下存在 jieqi.onnx（opset15 兼容版）。", "揭棋模式", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
         }
 
         private void button_go_immediately_Click(object sender, EventArgs e)

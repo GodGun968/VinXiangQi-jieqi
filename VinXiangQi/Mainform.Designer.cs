@@ -67,6 +67,7 @@
             this.checkBox_analyze_mode = new System.Windows.Forms.CheckBox();
             this.checkBox_universal_mouse = new System.Windows.Forms.CheckBox();
             this.checkBox_auto_click = new System.Windows.Forms.CheckBox();
+            this.checkBox_jieqi_mode = new System.Windows.Forms.CheckBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.button_clipboard_solution = new System.Windows.Forms.Button();
             this.comboBox_solution = new System.Windows.Forms.ComboBox();
@@ -475,6 +476,7 @@
             this.groupBox4.Controls.Add(this.checkBox_analyze_mode);
             this.groupBox4.Controls.Add(this.checkBox_universal_mouse);
             this.groupBox4.Controls.Add(this.checkBox_auto_click);
+            this.groupBox4.Controls.Add(this.checkBox_jieqi_mode);
             this.groupBox4.Location = new System.Drawing.Point(6, 24);
             this.groupBox4.Name = "groupBox4";
             this.groupBox4.Size = new System.Drawing.Size(223, 194);
@@ -618,6 +620,18 @@
             this.checkBox_auto_click.Text = "自动点击";
             this.checkBox_auto_click.UseVisualStyleBackColor = true;
             this.checkBox_auto_click.CheckedChanged += new System.EventHandler(this.checkBox_auto_click_CheckedChanged);
+            // 
+            // checkBox_jieqi_mode
+            // 
+            this.checkBox_jieqi_mode.AutoSize = true;
+            this.checkBox_jieqi_mode.Location = new System.Drawing.Point(15, 104);
+            this.checkBox_jieqi_mode.Name = "checkBox_jieqi_mode";
+            this.checkBox_jieqi_mode.Size = new System.Drawing.Size(89, 19);
+            this.checkBox_jieqi_mode.TabIndex = 38;
+            this.checkBox_jieqi_mode.TabStop = false;
+            this.checkBox_jieqi_mode.Text = "揭棋模式";
+            this.checkBox_jieqi_mode.UseVisualStyleBackColor = true;
+            this.checkBox_jieqi_mode.CheckedChanged += new System.EventHandler(this.checkBox_jieqi_mode_CheckedChanged);
             // 
             // groupBox3
             // 
@@ -990,6 +1004,7 @@
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel_info;
         private System.Windows.Forms.Button button_screenshot;
         private System.Windows.Forms.CheckBox checkBox_auto_click;
+        private System.Windows.Forms.CheckBox checkBox_jieqi_mode;
         private System.Windows.Forms.CheckBox checkBox_stop_when_mate;
         private System.Windows.Forms.Button button_go_immediately;
         private System.Windows.Forms.Button button_save_as_solution;

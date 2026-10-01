@@ -338,10 +338,11 @@ namespace VinXiangQi
 
                 foreach (var expectedBoard in ExpectedBoardMap)
                 {
-                    var cmpExpected = Utils.CompareBoard(expectedBoard.Value, PendingBoard);
+                    var cmpExpected = Utils.CompareBoard(expectedBoard.Value, PendingBoard, Settings.JieqiMode);
                     if (cmpExpected.DiffCount == 0)
                     {
-                        DisplayStatus("棋盘发生变化 为预期棋盘 跳过确认");
+                        string revealText = Settings.JieqiMode ? Utils.DescribeReveals(expectedBoard.Value, PendingBoard) : "";
+                        DisplayStatus("棋盘发生变化 为预期棋盘 跳过确认" + (revealText != "" ? ("，暗子翻开: " + revealText) : ""));
                         CurrentBoard = (string[,])PendingBoard.Clone();
                         return true;
                     }
@@ -397,43 +398,79 @@ namespace VinXiangQi
 
         bool ModelDetectBoard(Bitmap image, bool refreshBoard)
         {
+            if (Settings.JieqiMode && JieqiModel != null)
+            {
+                return GetBoardFromDetection(JieqiModelPredict(image), refreshBoard);
+            }
             var predictions = ModelPredict(image);
-            return GetBoardFromPrediction(predictions, refreshBoard);
+            List<PieceDetection> detections = new List<PieceDetection>();
+            foreach (var prediction in predictions)
+            {
+                detections.Add(new PieceDetection()
+                {
+                    Name = prediction.Label.Name,
+                    Score = prediction.Score,
+                    Rectangle = prediction.Rectangle
+                });
+            }
+            return GetBoardFromDetection(detections, refreshBoard);
         }
 
-        bool GetBoardFromPrediction(List<YoloPrediction> predictions, bool refreshBoard = false)
+        List<PieceDetection> JieqiModelPredict(Bitmap image)
+        {
+            YoloDisplayBitmap = new Bitmap(image.Width, image.Height);
+            YoloGDI = Graphics.FromImage(YoloDisplayBitmap);
+            YoloGDI.DrawImage(image, 0, 0);
+            DateTime st = DateTime.Now;
+            List<PieceDetection> detections = JieqiModel.Detect(image);
+            Debug.WriteLine("揭棋模型耗时: " + Math.Round((DateTime.Now - st).TotalSeconds, 2).ToString() + "s");
+            foreach (var detection in detections)
+            {
+                YoloGDI.DrawRectangles(new Pen(Color.Red, 1), new[] { detection.Rectangle });
+                float centerX = detection.Rectangle.X + detection.Rectangle.Width / 2;
+                float centerY = detection.Rectangle.Y + detection.Rectangle.Height / 2;
+                YoloGDI.FillEllipse(Brushes.Lime, new RectangleF(centerX - 2, centerY - 2, 4, 4));
+                YoloGDI.DrawString($"{detection.Name} {Math.Round(detection.Score, 2)}",
+                    new Font("Arial", 16, GraphicsUnit.Pixel), new SolidBrush(Color.Red),
+                    new PointF(detection.Rectangle.X - 3, detection.Rectangle.Y - 23));
+            }
+            pictureBox_show_result.Image = YoloDisplayBitmap;
+            return detections;
+        }
+
+        bool GetBoardFromDetection(List<PieceDetection> detections, bool refreshBoard = false)
         {
             RectangleF board = new Rectangle(-1, -1, -1, -1);
             int totalChessmanCount = 0;
             double totalChessmanWidth = 0, totalChessmanHeight = 0;
-            foreach (var prediction in predictions)
+            foreach (var detection in detections)
             {
-                if (prediction.Label.Name == "board")
+                if (detection.Name == "board")
                 {
-                    board = prediction.Rectangle;
+                    board = detection.Rectangle;
                 }
             }
-            foreach (var prediction in predictions)
+            foreach (var detection in detections)
             {
-                if (prediction.Label.Name != "board")
+                if (detection.Name != "board")
                 {
-                    double chessRatio = prediction.Rectangle.Width / prediction.Rectangle.Height;
+                    double chessRatio = detection.Rectangle.Width / detection.Rectangle.Height;
                     if (chessRatio > 1.3 || chessRatio < 0.7) continue;
                     totalChessmanCount++;
-                    totalChessmanWidth += prediction.Rectangle.Width;
-                    totalChessmanHeight += prediction.Rectangle.Height;
+                    totalChessmanWidth += detection.Rectangle.Width;
+                    totalChessmanHeight += detection.Rectangle.Height;
                 }
             }
-            List<YoloPrediction> validPredictions = new List<YoloPrediction>();
-            foreach (var prediction in predictions)
+            List<PieceDetection> validPredictions = new List<PieceDetection>();
+            foreach (var detection in detections)
             {
-                if (prediction.Label.Name == "board" || prediction.Label.Name == "obstacle") continue;
-                double chessRatio = prediction.Rectangle.Width / prediction.Rectangle.Height;
+                if (detection.Name == "board" || detection.Name == "obstacle") continue;
+                double chessRatio = detection.Rectangle.Width / detection.Rectangle.Height;
                 if (chessRatio > 1.3 || chessRatio < 0.7) continue;
-                var rect = prediction.Rectangle;
+                var rect = detection.Rectangle;
                 if (board.Contains(rect.X, rect.Y) || board.Contains(rect.Right, rect.Top) || board.Contains(rect.Left, rect.Bottom) || board.Contains(rect.Right, rect.Bottom))
                 {
-                    validPredictions.Add(prediction);
+                    validPredictions.Add(detection);
                 }
             }
             double minDistense = int.MaxValue;
@@ -503,23 +540,23 @@ namespace VinXiangQi
                 }
             }
            
-            foreach (var prediction in predictions)
+            foreach (var detection in detections)
             {
-                if (prediction.Label.Name == "board" || prediction.Label.Name == "obstacle") continue;
-                double chessRatio = prediction.Rectangle.Width / prediction.Rectangle.Height;
+                if (detection.Name == "board" || detection.Name == "obstacle") continue;
+                double chessRatio = detection.Rectangle.Width / detection.Rectangle.Height;
                 if (chessRatio > 1.3 || chessRatio < 0.7) continue;
-                float centerX = prediction.Rectangle.X + prediction.Rectangle.Width / 2;
-                float centerY = prediction.Rectangle.Y + prediction.Rectangle.Height / 2;
+                float centerX = detection.Rectangle.X + detection.Rectangle.Width / 2;
+                float centerY = detection.Rectangle.Y + detection.Rectangle.Height / 2;
                 float offsetX = centerX - board.X; // offset from the board
                 float offsetY = centerY - board.Y;
                 int xPos = (int)Math.Round(offsetX / gridWidth);
                 int yPos = (int)Math.Round(offsetY / gridHeight);
                 if (xPos >= 0 && xPos <= 8 && yPos >= 0 && yPos <= 9)
                 {
-                    tmpBoard[xPos, yPos] = prediction.Label.Name;
+                    tmpBoard[xPos, yPos] = detection.Name;
                 }
 
-                if (prediction.Label.Name == "r_jiang")
+                if (detection.Name == "r_jiang")
                 {
                     if (yPos < 5)
                     {
@@ -528,6 +565,20 @@ namespace VinXiangQi
                     else
                     {
                        RedSide = true;
+                    }
+                }
+            }
+            if (Settings.JieqiMode)
+            {
+                // 揭棋：模型可能输出裸 dark，按半区判定红黑（此时 RedSide 已确定）
+                for (int x = 0; x < 9; x++)
+                {
+                    for (int y = 0; y < 10; y++)
+                    {
+                        if (tmpBoard[x, y] == "dark")
+                        {
+                            tmpBoard[x, y] = ((y < 5) != RedSide) ? "r_anzi" : "b_anzi";
+                        }
                     }
                 }
             }
@@ -693,7 +744,7 @@ namespace VinXiangQi
         {
             if (CurrentBoard == null) return;
             var compareWithLast = Utils.CompareBoard(LastBoard, CurrentBoard);
-            var compareWithExpected = Utils.CompareBoard(ExpectedSelfGoBoard, CurrentBoard);
+            var compareWithExpected = Utils.CompareBoard(ExpectedSelfGoBoard, CurrentBoard, Settings.JieqiMode);
             if (compareWithLast.DiffCount == 0) return;
             string opponentSymbol =RedSide ? "b_" : "r_";
             string mySymbol = RedSide ? "r_" : "b_";
@@ -772,7 +823,8 @@ namespace VinXiangQi
                 LastBoard = (string[,])CurrentBoard.Clone();
                 ExpectedMove = "";
                 RenderDisplayBoard();
-                DisplayStatus("和预期棋盘一样，跳过");
+                string revealText = Settings.JieqiMode ? Utils.DescribeReveals(ExpectedSelfGoBoard, CurrentBoard) : "";
+                DisplayStatus("和预期棋盘一样，跳过" + (revealText != "" ? ("，暗子翻开: " + revealText) : ""));
                 return;
             }
             if ((compareWithLast.BlackDiff > 1 || compareWithLast.RedDiff > 1) && compareWithLast.DiffCount < 10)
@@ -813,7 +865,7 @@ namespace VinXiangQi
             if (BackgroundAnalyzing)
             {
                 BackgroundAnalyzing = false;
-                var compareWithPonder = Utils.CompareBoard(PonderBoard, CurrentBoard);
+                var compareWithPonder = Utils.CompareBoard(PonderBoard, CurrentBoard, Settings.JieqiMode);
                 if (compareWithPonder.DiffCount == 0)
                 {
                     DisplayStatus("后台思考命中");

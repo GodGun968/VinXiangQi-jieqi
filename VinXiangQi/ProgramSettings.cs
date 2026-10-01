@@ -26,6 +26,7 @@ namespace VinXiangQi
         public bool AutoClick = false;
         public bool StopWhenMate = false;
         public string YoloModel = "nano.onnx";
+        public bool JieqiMode = false;
         public bool UseOpenBook = false;
         public bool UseChessDB = false;
         public bool BackgroundAnalysis = false;
