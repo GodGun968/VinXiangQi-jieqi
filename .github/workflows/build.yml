@@ -1,0 +1,70 @@
+# VinXiangQi — GitHub Actions 构建工作流
+#
+# 只构建程序本体；产物不包含任何 .onnx 模型文件：
+#   普通象棋：小模型.onnx / 中模型.onnx / 万能带旋转.onnx
+#   揭棋    ：jieqi.onnx（需 opset15 / IR8 版本，旧版 ONNX Runtime 才能加载）
+#   引擎 exe 同样手动放入 Engines\，并在程序设置里指向它。
+name: build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-2022
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v3
+
+      - name: Setup NuGet
+        uses: nuget/setup-nuget@v3
+
+      # nuget restore 自动还原全部依赖；Prefer32Bit=true 会自动带入 x86 原生 onnxruntime（该组合实测可推理 jieqi.onnx）
+      - name: NuGet restore
+        run: nuget restore VinXiangQi.sln
+
+      # 复刻官方 v1.4.0 发布版的构建方式：
+      # AnyCPU + Prefer32Bit=true → 生成 32 位程序，加载 x86 版 onnxruntime.dll
+      - name: Build Release
+        run: msbuild VinXiangQi\VinXiangQi.csproj /nologo /m /v:m /p:Configuration=Release /p:Prefer32Bit=true
+
+      - name: Stage artifact (模型一律剔除)
+        shell: pwsh
+        run: |
+          $out  = 'VinXiangQi\bin\Release'
+          $dist = 'dist\VinXiangQi'
+          if (-not (Test-Path "$out\VinXiangQi.exe")) { throw "未找到构建产物：$out\VinXiangQi.exe" }
+          New-Item -ItemType Directory -Force -Path $dist | Out-Null
+          Copy-Item "$out\*" -Destination $dist -Recurse -Force
+          # e_sqlite3 原生库补一份到根目录（程序为 32 位；与官方发布版布局一致）
+          $sqlite = Join-Path $dist 'runtimes\win-x86\native\e_sqlite3.dll'
+          if (Test-Path $sqlite) { Copy-Item $sqlite -Destination $dist -Force }
+          # 剔除模型与调试符号，确保"无模型"产物
+          Get-ChildItem $dist -Recurse -File | Where-Object { $_.Extension -in '.onnx','.pdb' } | Remove-Item -Force
+          # 预建目录，便于手动放入
+          New-Item -ItemType Directory -Force -Path "$dist\Models", "$dist\Engines" | Out-Null
+          $note = @(
+            '【本包不含任何模型文件，请手动放入】',
+            'Models\  ：小模型.onnx / 中模型.onnx / 万能带旋转.onnx；揭棋另放 jieqi.onnx（需 opset15/IR8 版）',
+            'Engines\ ：引擎可执行文件（普通象棋用普通皮卡鱼；揭棋用支持揭棋的皮卡鱼），并在程序设置里指向它'
+          )
+          Set-Content -Path "$dist\请放入模型与引擎.txt" -Value $note -Encoding UTF8
+          # 目录内放占位说明（空目录不会被打进 artifact）
+          Set-Content -Path "$dist\Models\请放入模型文件.txt" -Value '把小模型.onnx / 中模型.onnx / 万能带旋转.onnx 放这里；揭棋另放 jieqi.onnx（需 opset15/IR8 版）' -Encoding UTF8
+          Set-Content -Path "$dist\Engines\请放入引擎文件.txt" -Value '把引擎 exe 放这里（普通象棋用普通皮卡鱼；揭棋用支持揭棋的皮卡鱼），再到程序设置里指向它' -Encoding UTF8
+          Get-ChildItem $dist | Select-Object Mode, Name
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: VinXiangQi-Release
+          path: dist/VinXiangQi
+          if-no-files-found: error
