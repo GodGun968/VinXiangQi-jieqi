@@ -26,6 +26,15 @@ namespace VinXiangQi
             InitializeComponent();
         }
 
+        // UI 初始化期间置 true：避免程序化赋值触发控件联动的副作用（如启动时误关揭棋模式）
+        bool settingsUILoading = false;
+
+        // 布局调整模式（菜单“布局调整”）：拖动分组框移动 / 边缘缩放，调整后自动保存
+        readonly LayoutEditor layoutEditor = new LayoutEditor();
+        readonly List<GroupBox> layoutBoxes = new List<GroupBox>();
+        readonly Dictionary<string, Rectangle> defaultLayoutBounds = new Dictionary<string, Rectangle>();
+        bool layoutInited = false;
+
         // 程序版本
         public static string Version = "1.4.0";
 
@@ -119,11 +128,14 @@ namespace VinXiangQi
                 InitSettingsUI();
                 InitThreads();
                 InitResultDisplay();
+                InitLayoutEditor();
+                ApplySavedLayout();
                 InitEngine();
                 Settings.BackgroundAnalysis = false;
             }
             catch (Exception ex)
             {
+                settingsUILoading = false;
                 MessageBox.Show(ex.ToString());
             }
         }
@@ -296,6 +308,7 @@ namespace VinXiangQi
 
         void InitSettingsUI()
         {
+            settingsUILoading = true;
             // 引擎多选框
             comboBox_engine.Items.Clear();
             comboBox_engine.Text = "";
@@ -334,11 +347,9 @@ namespace VinXiangQi
             checkBox_auto_click.Checked = Settings.AutoClick;
             // 绝杀自动立即走棋
             checkBox_stop_when_mate.Checked = Settings.StopWhenMate;
-            // 揭棋模式
-            checkBox_jieqi_mode.Checked = Settings.JieqiMode;
             // 自动走棋分数
             numericUpDown_stop_score.Value = (decimal)Settings.StopScore;
-            // Yolo模型选择
+            // 识别模型
             comboBox_yolo_models.Items.Clear();
             foreach (var yolo in ModelList)
             {
@@ -352,6 +363,135 @@ namespace VinXiangQi
             {
                 if (comboBox_yolo_models.SelectedItem == null) comboBox_yolo_models.SelectedIndex = 0;
             }
+            // 识别模式（象棋 / 揭棋）：模式决定识别模型，须在模型列表填充之后再回填
+            comboBox_detect_mode.SelectedIndex = Settings.JieqiMode ? 1 : 0;
+            ApplyDetectModeUI();
+            settingsUILoading = false;
+        }
+
+        // 按当前识别模式同步界面：揭棋模式固定用 jieqi.onnx（独立检测器），模型下拉锁定显示
+        void ApplyDetectModeUI()
+        {
+            const string jieqiItem = "jieqi（揭棋）";
+            if (Settings.JieqiMode && JieqiModel != null)
+            {
+                if (!comboBox_yolo_models.Items.Contains(jieqiItem))
+                {
+                    comboBox_yolo_models.Items.Add(jieqiItem);
+                }
+                comboBox_yolo_models.SelectedItem = jieqiItem;
+                comboBox_yolo_models.Enabled = false;
+            }
+            else
+            {
+                if (comboBox_yolo_models.Items.Contains(jieqiItem))
+                {
+                    comboBox_yolo_models.Items.Remove(jieqiItem);
+                }
+                comboBox_yolo_models.Enabled = true;
+                if (ModelList.ContainsKey(Settings.YoloModel))
+                {
+                    comboBox_yolo_models.SelectedItem = Settings.YoloModel;
+                    Model = ModelList[Settings.YoloModel];
+                }
+                else if (comboBox_yolo_models.Items.Count > 0)
+                {
+                    comboBox_yolo_models.SelectedIndex = 0;
+                }
+            }
+        }
+
+        private void comboBox_detect_mode_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (settingsUILoading) return;   // 初始化回填时跳过保存与提示
+            Settings.JieqiMode = (comboBox_detect_mode.SelectedIndex == 1);
+            ApplyDetectModeUI();
+            SaveSettings();
+            if (Settings.JieqiMode && JieqiModel == null)
+            {
+                MessageBox.Show("未找到或无法加载揭棋模型，请确认 Models 目录下存在 jieqi.onnx（opset15 兼容版）。", "揭棋模式", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        // ================= 布局调整模式 =================
+        // 菜单“布局调整”开启后：拖动分组框=移动；拖动边框/角=缩放；调整完成或关闭时自动保存
+        void InitLayoutEditor()
+        {
+            if (layoutInited) return;
+            layoutInited = true;
+            GroupBox[] boxes = new GroupBox[] { groupBox4, groupBox5, groupBox2, groupBox3, groupBox6, groupBox7, groupBox10 };
+            foreach (GroupBox box in boxes)
+            {
+                if (box == null) continue;
+                layoutBoxes.Add(box);
+                defaultLayoutBounds[box.Name] = box.Bounds;
+                layoutEditor.Add(box);
+            }
+            layoutEditor.Changed = SaveLayout;
+        }
+
+        void ApplySavedLayout()
+        {
+            if (Settings.LayoutPositions == null) Settings.LayoutPositions = new Dictionary<string, string>();
+            foreach (GroupBox box in layoutBoxes)
+            {
+                string val;
+                if (!Settings.LayoutPositions.TryGetValue(box.Name, out val)) continue;
+                string[] parts = val.Split(',');
+                if (parts.Length != 4) continue;
+                int x, y, w, h;
+                if (!int.TryParse(parts[0], out x) || !int.TryParse(parts[1], out y)
+                    || !int.TryParse(parts[2], out w) || !int.TryParse(parts[3], out h)) continue;
+                Control parent = box.Parent;
+                if (parent == null) continue;
+                if (w < 80) w = 80;
+                if (h < 50) h = 50;
+                if (w > parent.ClientSize.Width) w = parent.ClientSize.Width;
+                if (h > parent.ClientSize.Height) h = parent.ClientSize.Height;
+                if (x < 0) x = 0;
+                if (y < 0) y = 0;
+                if (x + w > parent.ClientSize.Width) x = parent.ClientSize.Width - w;
+                if (y + h > parent.ClientSize.Height) y = parent.ClientSize.Height - h;
+                box.Bounds = new Rectangle(x, y, w, h);
+            }
+        }
+
+        void RestoreDefaultLayout()
+        {
+            foreach (GroupBox box in layoutBoxes)
+            {
+                Rectangle r;
+                if (defaultLayoutBounds.TryGetValue(box.Name, out r))
+                {
+                    box.Bounds = r;
+                }
+            }
+        }
+
+        void SaveLayout()
+        {
+            if (Settings.LayoutPositions == null) Settings.LayoutPositions = new Dictionary<string, string>();
+            foreach (GroupBox box in layoutBoxes)
+            {
+                Settings.LayoutPositions[box.Name] = box.Bounds.X + "," + box.Bounds.Y + "," + box.Bounds.Width + "," + box.Bounds.Height;
+            }
+            SaveSettings();
+        }
+
+        private void ToolStripMenuItem_layout_edit_CheckedChanged(object sender, EventArgs e)
+        {
+            bool on = ToolStripMenuItem_layout_edit.Checked;
+            layoutEditor.SetEnabled(on);
+            if (!on) SaveLayout();
+            DisplayStatus(on ? "布局调整模式已开启：拖动分组框移动，拖动边缘或角缩放" : "布局调整模式已关闭，布局已保存");
+        }
+
+        private void ToolStripMenuItem_layout_reset_Click(object sender, EventArgs e)
+        {
+            if (Settings.LayoutPositions != null) Settings.LayoutPositions.Clear();
+            SaveSettings();
+            RestoreDefaultLayout();
+            DisplayStatus("已恢复默认布局");
         }
 
         void InitResultDisplay()
@@ -971,11 +1111,14 @@ namespace VinXiangQi
 
         private void comboBox_yolo_models_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (comboBox_yolo_models.SelectedItem != null)
+            if (comboBox_yolo_models.SelectedItem == null) return;
+            string selectedModel = comboBox_yolo_models.SelectedItem.ToString();
+            if (selectedModel.StartsWith("jieqi")) return;   // 揭棋条目由模式决定，不作为普通模型
+            Settings.YoloModel = selectedModel;
+            if (ModelList.ContainsKey(Settings.YoloModel))
             {
-                Settings.YoloModel = comboBox_yolo_models.SelectedItem.ToString();
+                Model = ModelList[Settings.YoloModel];
             }
-            Model = ModelList[Settings.YoloModel];
             SaveSettings();
         }
 
@@ -1014,16 +1157,6 @@ namespace VinXiangQi
         {
             Settings.StopWhenMate = checkBox_stop_when_mate.Checked;
             SaveSettings();
-        }
-
-        private void checkBox_jieqi_mode_CheckedChanged(object sender, EventArgs e)
-        {
-            Settings.JieqiMode = checkBox_jieqi_mode.Checked;
-            SaveSettings();
-            if (checkBox_jieqi_mode.Checked && JieqiModel == null)
-            {
-                MessageBox.Show("未找到或无法加载揭棋模型，请确认 Models 目录下存在 jieqi.onnx（opset15 兼容版）。", "揭棋模式", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
         }
 
         private void button_go_immediately_Click(object sender, EventArgs e)

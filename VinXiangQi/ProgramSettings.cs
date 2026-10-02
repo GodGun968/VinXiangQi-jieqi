@@ -27,6 +27,7 @@ namespace VinXiangQi
         public bool StopWhenMate = false;
         public string YoloModel = "nano.onnx";
         public bool JieqiMode = false;
+        public Dictionary<string, string> LayoutPositions = new Dictionary<string, string>();
         public bool UseOpenBook = false;
         public bool UseChessDB = false;
         public bool BackgroundAnalysis = false;

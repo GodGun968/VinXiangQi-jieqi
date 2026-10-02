@@ -67,7 +67,8 @@
             this.checkBox_analyze_mode = new System.Windows.Forms.CheckBox();
             this.checkBox_universal_mouse = new System.Windows.Forms.CheckBox();
             this.checkBox_auto_click = new System.Windows.Forms.CheckBox();
-            this.checkBox_jieqi_mode = new System.Windows.Forms.CheckBox();
+            this.comboBox_detect_mode = new System.Windows.Forms.ComboBox();
+            this.label2b = new System.Windows.Forms.Label();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.button_clipboard_solution = new System.Windows.Forms.Button();
             this.comboBox_solution = new System.Windows.Forms.ComboBox();
@@ -88,6 +89,8 @@
             this.ToolStripMenuItem_copy_fen = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_engine_management = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_openbook_management = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_layout_edit = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_layout_reset = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_about = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip = new System.Windows.Forms.StatusStrip();
             this.label_status = new System.Windows.Forms.ToolStripStatusLabel();
@@ -476,7 +479,8 @@
             this.groupBox4.Controls.Add(this.checkBox_analyze_mode);
             this.groupBox4.Controls.Add(this.checkBox_universal_mouse);
             this.groupBox4.Controls.Add(this.checkBox_auto_click);
-            this.groupBox4.Controls.Add(this.checkBox_jieqi_mode);
+            this.groupBox4.Controls.Add(this.label2b);
+            this.groupBox4.Controls.Add(this.comboBox_yolo_models);
             this.groupBox4.Location = new System.Drawing.Point(6, 24);
             this.groupBox4.Name = "groupBox4";
             this.groupBox4.Size = new System.Drawing.Size(223, 194);
@@ -489,7 +493,7 @@
             this.groupBox11.Controls.Add(this.label1);
             this.groupBox11.Controls.Add(this.numericUpDown_stop_score);
             this.groupBox11.Controls.Add(this.checkBox_stop_when_mate);
-            this.groupBox11.Location = new System.Drawing.Point(12, 123);
+            this.groupBox11.Location = new System.Drawing.Point(12, 128);
             this.groupBox11.Name = "groupBox11";
             this.groupBox11.Size = new System.Drawing.Size(135, 56);
             this.groupBox11.TabIndex = 36;
@@ -621,18 +625,6 @@
             this.checkBox_auto_click.UseVisualStyleBackColor = true;
             this.checkBox_auto_click.CheckedChanged += new System.EventHandler(this.checkBox_auto_click_CheckedChanged);
             // 
-            // checkBox_jieqi_mode
-            // 
-            this.checkBox_jieqi_mode.AutoSize = true;
-            this.checkBox_jieqi_mode.Location = new System.Drawing.Point(15, 104);
-            this.checkBox_jieqi_mode.Name = "checkBox_jieqi_mode";
-            this.checkBox_jieqi_mode.Size = new System.Drawing.Size(89, 19);
-            this.checkBox_jieqi_mode.TabIndex = 38;
-            this.checkBox_jieqi_mode.TabStop = false;
-            this.checkBox_jieqi_mode.Text = "揭棋模式";
-            this.checkBox_jieqi_mode.UseVisualStyleBackColor = true;
-            this.checkBox_jieqi_mode.CheckedChanged += new System.EventHandler(this.checkBox_jieqi_mode_CheckedChanged);
-            // 
             // groupBox3
             // 
             this.groupBox3.Controls.Add(this.button_clipboard_solution);
@@ -705,9 +697,9 @@
             // 
             this.groupBox2.Controls.Add(this.label3);
             this.groupBox2.Controls.Add(this.label2);
+            this.groupBox2.Controls.Add(this.comboBox_detect_mode);
             this.groupBox2.Controls.Add(this.button_advance_settings);
             this.groupBox2.Controls.Add(this.numericUpDown_scale_factor);
-            this.groupBox2.Controls.Add(this.comboBox_yolo_models);
             this.groupBox2.Controls.Add(this.button_redetect);
             this.groupBox2.Location = new System.Drawing.Point(384, 24);
             this.groupBox2.Name = "groupBox2";
@@ -732,7 +724,7 @@
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(67, 15);
             this.label2.TabIndex = 23;
-            this.label2.Text = "识别模型";
+            this.label2.Text = "识别模式";
             // 
             // button_advance_settings
             // 
@@ -775,13 +767,36 @@
             0});
             this.numericUpDown_scale_factor.ValueChanged += new System.EventHandler(this.numericUpDown_scale_factor_ValueChanged);
             // 
+            // comboBox_detect_mode
+            // 
+            this.comboBox_detect_mode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox_detect_mode.FormattingEnabled = true;
+            this.comboBox_detect_mode.Items.AddRange(new object[] {
+            "象棋",
+            "揭棋"});
+            this.comboBox_detect_mode.Location = new System.Drawing.Point(12, 45);
+            this.comboBox_detect_mode.Name = "comboBox_detect_mode";
+            this.comboBox_detect_mode.Size = new System.Drawing.Size(118, 23);
+            this.comboBox_detect_mode.TabIndex = 21;
+            this.comboBox_detect_mode.TabStop = false;
+            this.comboBox_detect_mode.SelectedIndexChanged += new System.EventHandler(this.comboBox_detect_mode_SelectedIndexChanged);
+            // 
+            // label2b
+            // 
+            this.label2b.AutoSize = true;
+            this.label2b.Location = new System.Drawing.Point(15, 108);
+            this.label2b.Name = "label2b";
+            this.label2b.Size = new System.Drawing.Size(52, 15);
+            this.label2b.TabIndex = 39;
+            this.label2b.Text = "识别模型";
+            // 
             // comboBox_yolo_models
             // 
             this.comboBox_yolo_models.FormattingEnabled = true;
-            this.comboBox_yolo_models.Location = new System.Drawing.Point(12, 45);
+            this.comboBox_yolo_models.Location = new System.Drawing.Point(73, 104);
             this.comboBox_yolo_models.Name = "comboBox_yolo_models";
-            this.comboBox_yolo_models.Size = new System.Drawing.Size(118, 23);
-            this.comboBox_yolo_models.TabIndex = 22;
+            this.comboBox_yolo_models.Size = new System.Drawing.Size(136, 23);
+            this.comboBox_yolo_models.TabIndex = 40;
             this.comboBox_yolo_models.TabStop = false;
             this.comboBox_yolo_models.SelectedIndexChanged += new System.EventHandler(this.comboBox_yolo_models_SelectedIndexChanged);
             // 
@@ -830,6 +845,8 @@
             this.ToolStripMenuItem_copy_fen,
             this.ToolStripMenuItem_engine_management,
             this.ToolStripMenuItem_openbook_management,
+            this.ToolStripMenuItem_layout_edit,
+            this.ToolStripMenuItem_layout_reset,
             this.ToolStripMenuItem_about});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
@@ -862,6 +879,21 @@
             this.ToolStripMenuItem_openbook_management.Size = new System.Drawing.Size(98, 26);
             this.ToolStripMenuItem_openbook_management.Text = "开局库管理";
             this.ToolStripMenuItem_openbook_management.Click += new System.EventHandler(this.ToolStripMenuItem_openbook_management_Click);
+            // 
+            // ToolStripMenuItem_layout_edit
+            // 
+            this.ToolStripMenuItem_layout_edit.CheckOnClick = true;
+            this.ToolStripMenuItem_layout_edit.Name = "ToolStripMenuItem_layout_edit";
+            this.ToolStripMenuItem_layout_edit.Size = new System.Drawing.Size(98, 26);
+            this.ToolStripMenuItem_layout_edit.Text = "布局调整";
+            this.ToolStripMenuItem_layout_edit.CheckedChanged += new System.EventHandler(this.ToolStripMenuItem_layout_edit_CheckedChanged);
+            // 
+            // ToolStripMenuItem_layout_reset
+            // 
+            this.ToolStripMenuItem_layout_reset.Name = "ToolStripMenuItem_layout_reset";
+            this.ToolStripMenuItem_layout_reset.Size = new System.Drawing.Size(122, 26);
+            this.ToolStripMenuItem_layout_reset.Text = "恢复默认布局";
+            this.ToolStripMenuItem_layout_reset.Click += new System.EventHandler(this.ToolStripMenuItem_layout_reset_Click);
             // 
             // ToolStripMenuItem_about
             // 
@@ -1004,7 +1036,8 @@
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel_info;
         private System.Windows.Forms.Button button_screenshot;
         private System.Windows.Forms.CheckBox checkBox_auto_click;
-        private System.Windows.Forms.CheckBox checkBox_jieqi_mode;
+        private System.Windows.Forms.ComboBox comboBox_detect_mode;
+        private System.Windows.Forms.Label label2b;
         private System.Windows.Forms.CheckBox checkBox_stop_when_mate;
         private System.Windows.Forms.Button button_go_immediately;
         private System.Windows.Forms.Button button_save_as_solution;
@@ -1034,6 +1067,8 @@
         private System.Windows.Forms.Button button_clipboard_solution;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_engine_management;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_openbook_management;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_layout_edit;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_layout_reset;
     }
 }
 
