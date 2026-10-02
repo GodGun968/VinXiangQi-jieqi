@@ -1,3 +1,6 @@
+本软件已增加揭棋模式,识别模型(jieqi.onnx)来源 [JieqiBox](https://github.com/Velithia/JieqiBox "QwQ")
+
+
 # VinXiangQi
 一款基于深度学习（YOLOv5）的中国象棋连线工具
 
