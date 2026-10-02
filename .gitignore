@@ -2,3 +2,11 @@
 .vs/*
 VinXiangQi/bin/*
 VinXiangQi/obj/*
+
+# 依赖包（由 nuget restore 自动还原，无需入库）
+packages/
+# 模型文件（手动放入 Models\，不入库）
+Models/*.onnx
+Models/*.bak
+# 根目录发布用压缩包（不入库）
+*.zip
