@@ -89,15 +89,10 @@ namespace VinXiangQi
 
             public static void MouseEvent(MouseEventFlags value)
             {
-                MousePoint position = GetCursorPosition();
-
-                mouse_event
-                    ((int)value,
-                     position.X,
-                     position.Y,
-                     0,
-                     0)
-                    ;
+                // mouse_event 的 dx/dy 在未加 MOUSEEVENTF_ABSOLUTE 标志时是“相对位移”。
+                // 原实现误把当前光标的绝对坐标传进来 → 每次按下/抬起前光标先飞走，点击位置全错。
+                // 光标已由 SetCursorPosition 定位，这里传 0,0（在当前位置点击）。
+                mouse_event((int)value, 0, 0, 0, 0);
             }
 
             [StructLayout(LayoutKind.Sequential)]

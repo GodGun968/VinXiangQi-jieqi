@@ -19,13 +19,17 @@ namespace VinXiangQi
 
     // 揭棋局面识别器。
     // jieqi.onnx 是 YOLO11 输出格式 ([1, 38, 8400]，34 类 + 4 bbox)，不能走 YoloScorer/YoloXiangQiModel 的 YOLOv5 解码路径，
-    // 因此独立用 InferenceSession 实现，解码逻辑与已通过端到端验证的 scratch/ortx86/JieqiX86Test.cs 一致。
+    // 因此独立用 InferenceSession 实现（解码逻辑与此前通过端到端验证的独立 x86 测试程序一致）。
     // 模型要求：opset15 / IR8（旧 x86 ONNX Runtime 最高支持 IR8）。Models\jieqi.onnx 已是降级版；
-    // 原始 IR9 版备份在 Models\jieqi.onnx.ir9.bak。
+    // 说明：本模型已降级为 opset15 / IR8，以适配 OnnxRuntime 1.11 的 IR8 上限。
     public class JieqiDetector : IDisposable
     {
-        const float CONF_THRESHOLD = 0.5f;
-        const float NMS_THRESHOLD = 0.45f;
+        const float DEFAULT_CONF_THRESHOLD = 0.5f;
+        const float DEFAULT_NMS_THRESHOLD = 0.45f;
+
+        // 运行时可调（默认值与旧硬编码一致；由 Mainform.ApplyDetectionParamsToDetector 推送）
+        public float ConfThreshold = DEFAULT_CONF_THRESHOLD;
+        public float NmsThreshold = DEFAULT_NMS_THRESHOLD;
 
         // jieqi.onnx 34 类 → 本程序内部棋子名；null 表示忽略该类（数字类 2/3/4/5）
         static readonly string[] ClassMap = new string[]
@@ -66,6 +70,10 @@ namespace VinXiangQi
         {
             List<PieceDetection> result = new List<PieceDetection>();
             if (session == null) return result;
+            float confThreshold = ConfThreshold;
+            if (confThreshold < 0.05f || confThreshold > 0.95f) confThreshold = DEFAULT_CONF_THRESHOLD;
+            float nmsThreshold = NmsThreshold;
+            if (nmsThreshold < 0.10f || nmsThreshold > 0.90f) nmsThreshold = DEFAULT_NMS_THRESHOLD;
             int W = image.Width, H = image.Height;
             if (W <= 0 || H <= 0) return result;
             float scale = Math.Min(640f / W, 640f / H);
@@ -145,7 +153,13 @@ namespace VinXiangQi
                                 bestCls = j - 4;
                             }
                         }
-                        if (bestSc < CONF_THRESHOLD) continue;
+                        if (bestSc < confThreshold)
+                        {
+                            // 将帅永远是明子且在九宫内；模型偶发只给低分（实测 0.38），
+                            // 被置信度过滤后会整盘判"缺少将帅"。给将帅类单独放宽下限（min(conf, 0.30)）。
+                            bool isJiangClass = (bestCls == 9 || bestCls == 31);   // 9=b_jiang 31=r_jiang
+                            if (!isJiangClass || bestSc < Math.Min(confThreshold, 0.30f)) continue;
+                        }
                         if (bestCls < 0 || bestCls >= ClassMap.Length) continue;
                         string name = ClassMap[bestCls];
                         if (name == null) continue;
@@ -179,7 +193,7 @@ namespace VinXiangQi
                         {
                             int b = order[j];
                             if (removed[b]) continue;
-                            if (Iou(boxA, boxes[b]) > NMS_THRESHOLD) removed[b] = true;
+                            if (Iou(boxA, boxes[b]) > nmsThreshold) removed[b] = true;
                         }
                     }
                 }

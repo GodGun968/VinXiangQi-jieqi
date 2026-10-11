@@ -137,7 +137,7 @@ namespace VinXiangQi
                 if (pos.X != -1)
                 {
                     Point p = Mainform.ClickPositionMap[pos.X, pos.Y];
-                    MouseHelper.MouseLeftClick(Mainform.ClickHandle, p.X, p.Y);
+                    Mainform.ClickAtBitmap(p);
                     this.Text = "Click On: " + pos.ToString() + " → " + p.ToString();
                 }
             }

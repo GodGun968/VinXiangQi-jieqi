@@ -13,9 +13,20 @@
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null))
+            if (disposing)
             {
-                components.Dispose();
+                if (components != null)
+                {
+                    components.Dispose();
+                }
+                if (toolTip_option != null)
+                {
+                    toolTip_option.Dispose();
+                }
+                if (boldFont != null)
+                {
+                    boldFont.Dispose();
+                }
             }
             base.Dispose(disposing);
         }
@@ -29,24 +40,26 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EngineSettingsForm));
-            this.flowLayoutPanel = new System.Windows.Forms.FlowLayoutPanel();
+            this.panel_scroll = new EngineScrollPanel();
             this.SuspendLayout();
             // 
-            // flowLayoutPanel
+            // panel_scroll
             // 
-            this.flowLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.flowLayoutPanel.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
-            this.flowLayoutPanel.Location = new System.Drawing.Point(0, 0);
-            this.flowLayoutPanel.Name = "flowLayoutPanel";
-            this.flowLayoutPanel.Size = new System.Drawing.Size(800, 450);
-            this.flowLayoutPanel.TabIndex = 0;
+            this.panel_scroll.AutoScroll = true;
+            this.panel_scroll.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel_scroll.Location = new System.Drawing.Point(0, 0);
+            this.panel_scroll.Name = "panel_scroll";
+            this.panel_scroll.Padding = new System.Windows.Forms.Padding(6);
+            this.panel_scroll.Size = new System.Drawing.Size(800, 450);
+            this.panel_scroll.TabIndex = 0;
             // 
             // EngineSettingsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Controls.Add(this.flowLayoutPanel);
+            this.ClientSize = new System.Drawing.Size(1024, 480);
+            this.MinimumSize = new System.Drawing.Size(600, 340);
+            this.Controls.Add(this.panel_scroll);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "EngineSettingsForm";
             this.Text = "引擎设置";
@@ -58,6 +71,6 @@
 
         #endregion
 
-        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel;
+        private EngineScrollPanel panel_scroll;
     }
 }

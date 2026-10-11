@@ -17,6 +17,10 @@ namespace VinXiangQi
         {
             public GroupBox Box;
             public Control Parent;
+            public bool Hosted;                       // 托管容器：不移动自身，改为调整父表格的行/列
+            public int HostedMask;                    // 允许触发的边缘（位掩码，1<<zone）
+            public Action<GroupBox, int, int, int> HostedDrag;   // (box, zone, dx, dy)
+            public Action<GroupBox> HostedEnd;
         }
 
         readonly List<Entry> entries = new List<Entry>();
@@ -33,14 +37,101 @@ namespace VinXiangQi
         public void Add(GroupBox box)
         {
             if (box == null || box.Parent == null) return;
-            Entry e = new Entry();
-            e.Box = box;
-            e.Parent = box.Parent;
-            entries.Add(e);
-            lookup[box] = e;
-            box.MouseDown += Box_MouseDown;
-            box.MouseMove += Box_MouseMove;
-            box.MouseUp += Box_MouseUp;
+            Entry e;
+            if (!lookup.TryGetValue(box, out e))
+            {
+                e = new Entry();
+                e.Box = box;
+                e.Parent = box.Parent;
+                entries.Add(e);
+                lookup[box] = e;
+                box.MouseDown += Box_MouseDown;
+                box.MouseMove += Box_MouseMove;
+                box.MouseUp += Box_MouseUp;
+            }
+        }
+
+        // 托管容器：自身由表格布局托管，拖动其允许的边缘时回调给外部调整行列
+        public void AddHosted(GroupBox box, int zoneMask, Action<GroupBox, int, int, int> drag, Action<GroupBox> end)
+        {
+            if (box == null || box.Parent == null) return;
+            Add(box);
+            Entry e = lookup[box];
+            e.Hosted = true;
+            e.HostedMask |= zoneMask;
+            e.HostedDrag = drag;
+            e.HostedEnd = end;
+            HookChildren(box);
+        }
+
+        readonly HashSet<Control> hookedSet = new HashSet<Control>();
+
+        // 递归挂钩子控件：托管容器的边缘常被 Dock=Fill 的子控件覆盖，需要转发鼠标事件
+        void HookChildren(Control parent)
+        {
+            foreach (Control c in parent.Controls)
+            {
+                if (hookedSet.Add(c))
+                {
+                    c.MouseDown += HostedChild_MouseDown;
+                    c.MouseMove += HostedChild_MouseMove;
+                }
+                if (c.Controls.Count > 0) HookChildren(c);
+            }
+        }
+
+        // 多层向上回退：从鼠标所在控件出发逐层向上，命中哪一层托管框的可用边缘就用哪一层
+        // （修复：最近的托管框会挡住外层分隔边，导致部分分隔线拖不动）
+        GroupBox FindHosted(Control c, Point screenPt, out int zoneHit)
+        {
+            zoneHit = -1;
+            while (c != null)
+            {
+                GroupBox gb = c as GroupBox;
+                if (gb != null)
+                {
+                    Entry en;
+                    if (lookup.TryGetValue(gb, out en) && en.Hosted)
+                    {
+                        Point p = gb.PointToClient(screenPt);
+                        int z = HitZone(en, p);
+                        if (((en.HostedMask >> z) & 1) != 0)
+                        {
+                            zoneHit = z;
+                            return gb;
+                        }
+                    }
+                }
+                c = c.Parent;
+            }
+            return null;
+        }
+
+        void HostedChild_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (!Enabled || e.Button != MouseButtons.Left) return;
+            Control src = sender as Control;
+            if (src == null) return;
+            int z;
+            GroupBox box = FindHosted(src, src.PointToScreen(e.Location), out z);
+            if (box == null) return;
+            Entry en = lookup[box];
+            active = en;
+            zone = z;
+            startMouse = Cursor.Position;
+            startBounds = box.Bounds;
+            box.Capture = true;
+            src.Cursor = ZoneCursor(z);
+        }
+
+        void HostedChild_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (!Enabled || active != null) return;
+            Control src = sender as Control;
+            if (src == null) return;
+            int z;
+            GroupBox box = FindHosted(src, src.PointToScreen(e.Location), out z);
+            src.Cursor = (box != null) ? ZoneCursor(z) : Cursors.Default;
         }
 
         public void SetEnabled(bool on)
@@ -49,7 +140,14 @@ namespace VinXiangQi
             active = null;
             foreach (Entry e in entries)
             {
-                e.Box.Cursor = on ? Cursors.SizeAll : Cursors.Default;
+                e.Box.Cursor = (on && !e.Hosted) ? Cursors.SizeAll : Cursors.Default;
+            }
+            if (!on)
+            {
+                foreach (Control c in hookedSet)
+                {
+                    c.Cursor = Cursors.Default;
+                }
             }
         }
 
@@ -87,8 +185,10 @@ namespace VinXiangQi
             GroupBox box = (GroupBox)sender;
             Entry en;
             if (!lookup.TryGetValue(box, out en)) return;
+            int z = HitZone(en, e.Location);
+            if (en.Hosted && ((en.HostedMask >> z) & 1) == 0) return;
             active = en;
-            zone = HitZone(en, e.Location);
+            zone = z;
             startMouse = Cursor.Position;
             startBounds = box.Bounds;
             box.Capture = true;
@@ -104,13 +204,22 @@ namespace VinXiangQi
                 Entry en;
                 if (lookup.TryGetValue(box, out en))
                 {
-                    box.Cursor = ZoneCursor(HitZone(en, e.Location));
+                    int hz = HitZone(en, e.Location);
+                    if (en.Hosted && ((en.HostedMask >> hz) & 1) == 0) box.Cursor = Cursors.Default;
+                    else box.Cursor = ZoneCursor(hz);
                 }
                 return;
             }
 
             int dx = Cursor.Position.X - startMouse.X;
             int dy = Cursor.Position.Y - startMouse.Y;
+
+            if (active.Hosted)
+            {
+                if (active.HostedDrag != null) active.HostedDrag(box, zone, dx, dy);
+                return;
+            }
+
             bool useLeft = zone == 3 || zone == 5 || zone == 7;
             bool useRight = zone == 4 || zone == 6 || zone == 8;
             bool useTop = zone == 1 || zone == 5 || zone == 6;
@@ -161,6 +270,7 @@ namespace VinXiangQi
         {
             if (active == null || active.Box != (GroupBox)sender) return;
             ((GroupBox)sender).Capture = false;
+            if (active.Hosted && active.HostedEnd != null) active.HostedEnd(active.Box);
             active = null;
             if (Changed != null) Changed();
         }

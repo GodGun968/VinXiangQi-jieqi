@@ -111,7 +111,14 @@ namespace VinXiangQi
             try
             {
                 Bitmap bmpImage = new Bitmap(img);
-                return bmpImage.Clone(cropArea, bmpImage.PixelFormat);
+                try
+                {
+                    return bmpImage.Clone(cropArea, bmpImage.PixelFormat);
+                }
+                finally
+                {
+                    bmpImage.Dispose();
+                }
             }
             catch (Exception ex)
             {

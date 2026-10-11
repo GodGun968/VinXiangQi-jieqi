@@ -50,6 +50,11 @@ namespace VinXiangQi
         private static extern IntPtr GetWindowDC(
          IntPtr hwnd
          );
+        [DllImport("user32.dll")]
+        private static extern int ReleaseDC(
+         IntPtr hwnd,
+         IntPtr hdc
+         );
         #endregion
 
         [DllImport("user32.dll", EntryPoint = "WindowFromPoint")]//指定坐标处窗体句柄
@@ -162,17 +167,30 @@ namespace VinXiangQi
 
         public static Bitmap GetWindowCapture(IntPtr hWnd)
         {
-            IntPtr hscrdc = GetWindowDC(hWnd);
+            if (hWnd == IntPtr.Zero) return new Bitmap(1, 1);
             Rectangle windowRect = GetWindowRectangleWithShadow(hWnd);
-            IntPtr hbitmap = CreateCompatibleBitmap(hscrdc, windowRect.Width, windowRect.Height);
-            IntPtr hmemdc = CreateCompatibleDC(hscrdc);
-            SelectObject(hmemdc, hbitmap);
-            PrintWindow(hWnd, hmemdc, 0);
-            Bitmap bmp = Image.FromHbitmap(hbitmap);
-            DeleteDC(hscrdc);//删除用过的对象
-            DeleteDC(hmemdc);//删除用过的对象
-            DeleteObject(hbitmap);
-            return bmp;
+            if (windowRect.Width <= 0 || windowRect.Height <= 0) return new Bitmap(1, 1);
+            IntPtr hscrdc = GetWindowDC(hWnd);
+            if (hscrdc == IntPtr.Zero) return new Bitmap(1, 1);
+            IntPtr hmemdc = IntPtr.Zero;
+            IntPtr hbitmap = IntPtr.Zero;
+            try
+            {
+                hbitmap = CreateCompatibleBitmap(hscrdc, windowRect.Width, windowRect.Height);
+                if (hbitmap == IntPtr.Zero) return new Bitmap(1, 1);
+                hmemdc = CreateCompatibleDC(hscrdc);
+                if (hmemdc == IntPtr.Zero) return new Bitmap(1, 1);
+                SelectObject(hmemdc, hbitmap);
+                PrintWindow(hWnd, hmemdc, 0);
+                return Image.FromHbitmap(hbitmap);
+            }
+            finally
+            {
+                // 句柄释放：GetWindowDC 必须用 ReleaseDC；CreateCompatibleDC/Bitmap 用 DeleteDC/DeleteObject
+                if (hbitmap != IntPtr.Zero) DeleteObject(hbitmap);
+                if (hmemdc != IntPtr.Zero) DeleteDC(hmemdc);
+                ReleaseDC(hWnd, hscrdc);
+            }
             //Rectangle clientRect = GetWindowRectWithoutTitle(hWnd);
             //int borderSize = (windowRect.Width - clientRect.Width) / 2;
             //int titleBarSize = (windowRect.Height - clientRect.Height) - borderSize;
@@ -184,6 +202,42 @@ namespace VinXiangQi
 
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         static extern int GetWindowTextLength(IntPtr hWnd);
+
+        // 第二十五轮：安全取窗口标题（句柄失效返回空串，不抛异常）
+        public static string GetWindowTextSafe(IntPtr hWnd)
+        {
+            try { if (hWnd == IntPtr.Zero) return ""; return GetWindowTitle(hWnd) ?? ""; }
+            catch { return ""; }
+        }
+
+        // 第二十五轮：按标题模糊查找顶层窗口（句柄失效后自动重取用；找不到返回 IntPtr.Zero）。
+        // 注意：FindWindow 已在本类上方声明（public static extern），此处不得重复 P/Invoke。
+        public static IntPtr FindWindowByTitleFuzzy(string titlePart)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(titlePart)) return IntPtr.Zero;
+                IntPtr h = FindWindow(null, titlePart);       // 先精确
+                if (h != IntPtr.Zero) return h;
+                foreach (System.Diagnostics.Process p in System.Diagnostics.Process.GetProcesses())
+                {
+                    try
+                    {
+                        if (p.MainWindowHandle == IntPtr.Zero) continue;
+                        string t = p.MainWindowTitle ?? "";
+                        if (t.Length > 0 && (t.IndexOf(titlePart, StringComparison.OrdinalIgnoreCase) >= 0
+                            || titlePart.IndexOf(t, StringComparison.OrdinalIgnoreCase) >= 0))
+                        {
+                            return p.MainWindowHandle;
+                        }
+                    }
+                    catch { }
+                    finally { try { p.Dispose(); } catch { } }
+                }
+            }
+            catch { }
+            return IntPtr.Zero;
+        }
 
         public static string GetWindowTitle(IntPtr hWnd)
         {

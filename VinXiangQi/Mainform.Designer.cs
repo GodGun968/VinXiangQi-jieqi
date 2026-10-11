@@ -41,16 +41,25 @@
             this.groupBox_engine_settings = new System.Windows.Forms.GroupBox();
             this.tableLayoutPanel_engine = new System.Windows.Forms.TableLayoutPanel();
             this.checkBox_auto_scroll = new System.Windows.Forms.CheckBox();
+            this.groupBox_log = new System.Windows.Forms.GroupBox();
+            this.panel_trend = new System.Windows.Forms.Panel();
+            this.comboBox_trend_mode = new System.Windows.Forms.ComboBox();
+            this.pictureBox_trend = new System.Windows.Forms.PictureBox();
             this.groupBox_engine_basic = new System.Windows.Forms.GroupBox();
-            this.groupBox10 = new System.Windows.Forms.GroupBox();
-            this.numericUpDown_engine_depth = new System.Windows.Forms.NumericUpDown();
-            this.groupBox7 = new System.Windows.Forms.GroupBox();
-            this.numericUpDown_thread_count = new System.Windows.Forms.NumericUpDown();
-            this.groupBox6 = new System.Windows.Forms.GroupBox();
-            this.numericUpDown_step_time = new System.Windows.Forms.NumericUpDown();
+            this.checkBox_ponder = new System.Windows.Forms.CheckBox();
+            this.checkBox_engine_log = new System.Windows.Forms.CheckBox();
             this.label_engine = new System.Windows.Forms.Label();
+            this.label_hash = new System.Windows.Forms.Label();
+            this.label_hash_unit = new System.Windows.Forms.Label();
+            this.label_thread_count = new System.Windows.Forms.Label();
+            this.numericUpDown_thread_count = new System.Windows.Forms.NumericUpDown();
+            this.label_thread_unit = new System.Windows.Forms.Label();
+            this.numericUpDown_hash = new System.Windows.Forms.NumericUpDown();
+            this.button_time_settings = new System.Windows.Forms.Button();
             this.comboBox_engine = new System.Windows.Forms.ComboBox();
             this.groupBox_side = new System.Windows.Forms.GroupBox();
+            this.groupBox_capture_mouse = new System.Windows.Forms.GroupBox();
+            this.button_capture_mouse_settings = new System.Windows.Forms.Button();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
             this.button_stop_detection = new System.Windows.Forms.Button();
             this.button_start_from_oppo = new System.Windows.Forms.Button();
@@ -62,10 +71,12 @@
             this.numericUpDown_stop_score = new System.Windows.Forms.NumericUpDown();
             this.checkBox_stop_when_mate = new System.Windows.Forms.CheckBox();
             this.checkBox_auto_go = new System.Windows.Forms.CheckBox();
-            this.checkBox_universal_mode = new System.Windows.Forms.CheckBox();
+            this.label_capture_mode = new System.Windows.Forms.Label();
+            this.comboBox_capture_mode = new System.Windows.Forms.ComboBox();
             this.checkBox_debug = new System.Windows.Forms.CheckBox();
             this.checkBox_analyze_mode = new System.Windows.Forms.CheckBox();
-            this.checkBox_universal_mouse = new System.Windows.Forms.CheckBox();
+            this.label_mouse_mode = new System.Windows.Forms.Label();
+            this.comboBox_mouse_mode = new System.Windows.Forms.ComboBox();
             this.checkBox_auto_click = new System.Windows.Forms.CheckBox();
             this.comboBox_detect_mode = new System.Windows.Forms.ComboBox();
             this.label2b = new System.Windows.Forms.Label();
@@ -107,13 +118,10 @@
             this.groupBox_engine_settings.SuspendLayout();
             this.tableLayoutPanel_engine.SuspendLayout();
             this.groupBox_engine_basic.SuspendLayout();
-            this.groupBox10.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_engine_depth)).BeginInit();
-            this.groupBox7.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_hash)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_thread_count)).BeginInit();
-            this.groupBox6.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_step_time)).BeginInit();
             this.groupBox_side.SuspendLayout();
+            this.groupBox_capture_mouse.SuspendLayout();
             this.groupBox5.SuspendLayout();
             this.groupBox4.SuspendLayout();
             this.groupBox11.SuspendLayout();
@@ -122,6 +130,9 @@
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_scale_factor)).BeginInit();
             this.tableLayoutPanel_think_detail.SuspendLayout();
+            this.groupBox_log.SuspendLayout();
+            this.panel_trend.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox_trend)).BeginInit();
             this.menuStrip1.SuspendLayout();
             this.statusStrip.SuspendLayout();
             this.SuspendLayout();
@@ -166,6 +177,7 @@
             // groupBox_picturebox
             // 
             this.groupBox_picturebox.Controls.Add(this.pictureBox_show_result);
+            this.groupBox_picturebox.Controls.Add(this.panel_trend);
             this.groupBox_picturebox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox_picturebox.Location = new System.Drawing.Point(3, 3);
             this.groupBox_picturebox.Name = "groupBox_picturebox";
@@ -229,17 +241,15 @@
             // 
             this.tableLayoutPanel_engine.ColumnCount = 1;
             this.tableLayoutPanel_engine.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel_engine.Controls.Add(this.checkBox_auto_scroll, 0, 2);
             this.tableLayoutPanel_engine.Controls.Add(this.groupBox_engine_basic, 0, 0);
             this.tableLayoutPanel_engine.Controls.Add(this.groupBox_side, 0, 1);
-            this.tableLayoutPanel_engine.Controls.Add(this.tableLayoutPanel_think_detail, 0, 3);
+            this.tableLayoutPanel_engine.Controls.Add(this.groupBox_log, 0, 2);
             this.tableLayoutPanel_engine.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel_engine.Location = new System.Drawing.Point(3, 21);
             this.tableLayoutPanel_engine.Name = "tableLayoutPanel_engine";
-            this.tableLayoutPanel_engine.RowCount = 4;
-            this.tableLayoutPanel_engine.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 100F));
-            this.tableLayoutPanel_engine.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 254F));
-            this.tableLayoutPanel_engine.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 25F));
+            this.tableLayoutPanel_engine.RowCount = 3;
+            this.tableLayoutPanel_engine.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 118F));
+            this.tableLayoutPanel_engine.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 350F));
             this.tableLayoutPanel_engine.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel_engine.Size = new System.Drawing.Size(731, 664);
             this.tableLayoutPanel_engine.TabIndex = 0;
@@ -249,7 +259,8 @@
             this.checkBox_auto_scroll.AutoSize = true;
             this.checkBox_auto_scroll.Checked = true;
             this.checkBox_auto_scroll.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox_auto_scroll.Location = new System.Drawing.Point(3, 357);
+            this.checkBox_auto_scroll.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.checkBox_auto_scroll.Padding = new System.Windows.Forms.Padding(5, 2, 0, 2);
             this.checkBox_auto_scroll.Name = "checkBox_auto_scroll";
             this.checkBox_auto_scroll.Size = new System.Drawing.Size(89, 19);
             this.checkBox_auto_scroll.TabIndex = 29;
@@ -259,66 +270,133 @@
             // 
             // groupBox_engine_basic
             // 
-            this.groupBox_engine_basic.Controls.Add(this.groupBox10);
-            this.groupBox_engine_basic.Controls.Add(this.groupBox7);
-            this.groupBox_engine_basic.Controls.Add(this.groupBox6);
             this.groupBox_engine_basic.Controls.Add(this.label_engine);
             this.groupBox_engine_basic.Controls.Add(this.comboBox_engine);
+            this.groupBox_engine_basic.Controls.Add(this.checkBox_ponder);
+            this.groupBox_engine_basic.Controls.Add(this.checkBox_engine_log);
+            this.groupBox_engine_basic.Controls.Add(this.button_time_settings);
+            this.groupBox_engine_basic.Controls.Add(this.label_hash);
+            this.groupBox_engine_basic.Controls.Add(this.numericUpDown_hash);
+            this.groupBox_engine_basic.Controls.Add(this.label_hash_unit);
+            this.groupBox_engine_basic.Controls.Add(this.label_thread_count);
+            this.groupBox_engine_basic.Controls.Add(this.numericUpDown_thread_count);
+            this.groupBox_engine_basic.Controls.Add(this.label_thread_unit);
             this.groupBox_engine_basic.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox_engine_basic.Location = new System.Drawing.Point(3, 3);
             this.groupBox_engine_basic.Name = "groupBox_engine_basic";
-            this.groupBox_engine_basic.Size = new System.Drawing.Size(725, 94);
+            this.groupBox_engine_basic.Size = new System.Drawing.Size(725, 112);
             this.groupBox_engine_basic.TabIndex = 0;
             this.groupBox_engine_basic.TabStop = false;
             this.groupBox_engine_basic.Text = "引擎设置";
             // 
-            // groupBox10
+            // button_time_settings
             // 
-            this.groupBox10.Controls.Add(this.numericUpDown_engine_depth);
-            this.groupBox10.Location = new System.Drawing.Point(461, 15);
-            this.groupBox10.Name = "groupBox10";
-            this.groupBox10.Size = new System.Drawing.Size(96, 56);
-            this.groupBox10.TabIndex = 34;
-            this.groupBox10.TabStop = false;
-            this.groupBox10.Text = "思考深度";
+            this.button_time_settings.Location = new System.Drawing.Point(22, 56);
+            this.button_time_settings.Name = "button_time_settings";
+            this.button_time_settings.Size = new System.Drawing.Size(110, 28);
+            this.button_time_settings.TabIndex = 56;
+            this.button_time_settings.TabStop = false;
+            this.button_time_settings.Text = "时间设置";
+            this.button_time_settings.UseVisualStyleBackColor = true;
+            this.button_time_settings.Click += new System.EventHandler(this.button_time_settings_Click);
             // 
-            // numericUpDown_engine_depth
+            // label_engine
             // 
-            this.numericUpDown_engine_depth.Location = new System.Drawing.Point(6, 20);
-            this.numericUpDown_engine_depth.Maximum = new decimal(new int[] {
-            200,
+            this.label_engine.AutoSize = true;
+            this.label_engine.Location = new System.Drawing.Point(26, 25);
+            this.label_engine.Name = "label_engine";
+            this.label_engine.Size = new System.Drawing.Size(45, 15);
+            this.label_engine.TabIndex = 4;
+            this.label_engine.Text = "引擎:";
+            // 
+            // comboBox_engine
+            // 
+            this.comboBox_engine.FormattingEnabled = true;
+            this.comboBox_engine.Location = new System.Drawing.Point(77, 22);
+            this.comboBox_engine.Name = "comboBox_engine";
+            this.comboBox_engine.Size = new System.Drawing.Size(247, 23);
+            this.comboBox_engine.TabIndex = 1;
+            this.comboBox_engine.TabStop = false;
+            this.comboBox_engine.SelectedIndexChanged += new System.EventHandler(this.comboBox_engine_SelectedIndexChanged);
+            // 
+            // checkBox_ponder
+            // 
+            this.checkBox_ponder.AutoSize = true;
+            this.checkBox_ponder.Location = new System.Drawing.Point(330, 26);
+            this.checkBox_ponder.Name = "checkBox_ponder";
+            this.checkBox_ponder.Size = new System.Drawing.Size(80, 19);
+            this.checkBox_ponder.TabIndex = 40;
+            this.checkBox_ponder.TabStop = false;
+            this.checkBox_ponder.Text = "后台思考";
+            this.checkBox_ponder.UseVisualStyleBackColor = true;
+            this.checkBox_ponder.CheckedChanged += new System.EventHandler(this.checkBox_ponder_CheckedChanged);
+            // 
+            // checkBox_engine_log
+            // 
+            this.checkBox_engine_log.AutoSize = false;
+            this.checkBox_engine_log.Location = new System.Drawing.Point(440, 26);
+            this.checkBox_engine_log.Name = "checkBox_engine_log";
+            this.checkBox_engine_log.Size = new System.Drawing.Size(100, 22);
+            this.checkBox_engine_log.TabIndex = 58;
+            this.checkBox_engine_log.TabStop = false;
+            this.checkBox_engine_log.Text = "引擎记录";
+            this.checkBox_engine_log.UseVisualStyleBackColor = true;
+            this.checkBox_engine_log.CheckedChanged += new System.EventHandler(this.checkBox_engine_log_CheckedChanged);
+            // 
+            // label_hash
+            // 
+            this.label_hash.AutoSize = true;
+            this.label_hash.Location = new System.Drawing.Point(146, 62);
+            this.label_hash.Name = "label_hash";
+            this.label_hash.Size = new System.Drawing.Size(59, 15);
+            this.label_hash.TabIndex = 41;
+            this.label_hash.Text = "Hash";
+            // 
+            // numericUpDown_hash
+            // 
+            this.numericUpDown_hash.Location = new System.Drawing.Point(210, 58);
+            this.numericUpDown_hash.Maximum = new decimal(new int[] {
+            33554432,
             0,
             0,
             0});
-            this.numericUpDown_engine_depth.Minimum = new decimal(new int[] {
+            this.numericUpDown_hash.Minimum = new decimal(new int[] {
             1,
             0,
             0,
             0});
-            this.numericUpDown_engine_depth.Name = "numericUpDown_engine_depth";
-            this.numericUpDown_engine_depth.Size = new System.Drawing.Size(84, 25);
-            this.numericUpDown_engine_depth.TabIndex = 2;
-            this.numericUpDown_engine_depth.TabStop = false;
-            this.numericUpDown_engine_depth.Value = new decimal(new int[] {
-            200,
+            this.numericUpDown_hash.Name = "numericUpDown_hash";
+            this.numericUpDown_hash.Size = new System.Drawing.Size(84, 25);
+            this.numericUpDown_hash.TabIndex = 42;
+            this.numericUpDown_hash.TabStop = false;
+            this.numericUpDown_hash.Value = new decimal(new int[] {
+            16,
             0,
             0,
             0});
-            this.numericUpDown_engine_depth.ValueChanged += new System.EventHandler(this.numericUpDown_engine_depth_ValueChanged);
+            this.numericUpDown_hash.ValueChanged += new System.EventHandler(this.numericUpDown_hash_ValueChanged);
             // 
-            // groupBox7
+            // label_hash_unit
             // 
-            this.groupBox7.Controls.Add(this.numericUpDown_thread_count);
-            this.groupBox7.Location = new System.Drawing.Point(563, 15);
-            this.groupBox7.Name = "groupBox7";
-            this.groupBox7.Size = new System.Drawing.Size(98, 56);
-            this.groupBox7.TabIndex = 34;
-            this.groupBox7.TabStop = false;
-            this.groupBox7.Text = "线程数";
+            this.label_hash_unit.AutoSize = true;
+            this.label_hash_unit.Location = new System.Drawing.Point(302, 62);
+            this.label_hash_unit.Name = "label_hash_unit";
+            this.label_hash_unit.Size = new System.Drawing.Size(27, 15);
+            this.label_hash_unit.TabIndex = 57;
+            this.label_hash_unit.Text = "MB";
+            // 
+            // label_thread_count
+            // 
+            this.label_thread_count.AutoSize = true;
+            this.label_thread_count.Location = new System.Drawing.Point(345, 62);
+            this.label_thread_count.Name = "label_thread_count";
+            this.label_thread_count.Size = new System.Drawing.Size(45, 15);
+            this.label_thread_count.TabIndex = 58;
+            this.label_thread_count.Text = "线程数";
             // 
             // numericUpDown_thread_count
             // 
-            this.numericUpDown_thread_count.Location = new System.Drawing.Point(6, 20);
+            this.numericUpDown_thread_count.Location = new System.Drawing.Point(400, 58);
             this.numericUpDown_thread_count.Maximum = new decimal(new int[] {
             128,
             0,
@@ -330,77 +408,29 @@
             0,
             0});
             this.numericUpDown_thread_count.Name = "numericUpDown_thread_count";
-            this.numericUpDown_thread_count.Size = new System.Drawing.Size(86, 25);
-            this.numericUpDown_thread_count.TabIndex = 8;
+            this.numericUpDown_thread_count.Size = new System.Drawing.Size(70, 25);
+            this.numericUpDown_thread_count.TabIndex = 59;
             this.numericUpDown_thread_count.TabStop = false;
             this.numericUpDown_thread_count.Value = new decimal(new int[] {
-            8,
+            4,
             0,
             0,
             0});
             this.numericUpDown_thread_count.ValueChanged += new System.EventHandler(this.numericUpDown_thread_count_ValueChanged);
             // 
-            // groupBox6
+            // label_thread_unit
             // 
-            this.groupBox6.Controls.Add(this.numericUpDown_step_time);
-            this.groupBox6.Location = new System.Drawing.Point(349, 15);
-            this.groupBox6.Name = "groupBox6";
-            this.groupBox6.Size = new System.Drawing.Size(96, 56);
-            this.groupBox6.TabIndex = 33;
-            this.groupBox6.TabStop = false;
-            this.groupBox6.Text = "思考时间";
-            // 
-            // numericUpDown_step_time
-            // 
-            this.numericUpDown_step_time.DecimalPlaces = 1;
-            this.numericUpDown_step_time.Increment = new decimal(new int[] {
-            5,
-            0,
-            0,
-            65536});
-            this.numericUpDown_step_time.Location = new System.Drawing.Point(6, 20);
-            this.numericUpDown_step_time.Maximum = new decimal(new int[] {
-            9999,
-            0,
-            0,
-            0});
-            this.numericUpDown_step_time.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            -2147483648});
-            this.numericUpDown_step_time.Name = "numericUpDown_step_time";
-            this.numericUpDown_step_time.Size = new System.Drawing.Size(84, 25);
-            this.numericUpDown_step_time.TabIndex = 2;
-            this.numericUpDown_step_time.TabStop = false;
-            this.numericUpDown_step_time.Value = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this.numericUpDown_step_time.ValueChanged += new System.EventHandler(this.numericUpDown_step_time_ValueChanged);
-            // 
-            // label_engine
-            // 
-            this.label_engine.AutoSize = true;
-            this.label_engine.Location = new System.Drawing.Point(26, 37);
-            this.label_engine.Name = "label_engine";
-            this.label_engine.Size = new System.Drawing.Size(45, 15);
-            this.label_engine.TabIndex = 4;
-            this.label_engine.Text = "引擎:";
-            // 
-            // comboBox_engine
-            // 
-            this.comboBox_engine.FormattingEnabled = true;
-            this.comboBox_engine.Location = new System.Drawing.Point(77, 34);
-            this.comboBox_engine.Name = "comboBox_engine";
-            this.comboBox_engine.Size = new System.Drawing.Size(247, 23);
-            this.comboBox_engine.TabIndex = 1;
-            this.comboBox_engine.TabStop = false;
-            this.comboBox_engine.SelectedIndexChanged += new System.EventHandler(this.comboBox_engine_SelectedIndexChanged);
+            this.label_thread_unit.AutoSize = true;
+            this.label_thread_unit.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(90)))), ((int)(((byte)(90)))), ((int)(((byte)(90)))));
+            this.label_thread_unit.Location = new System.Drawing.Point(476, 62);
+            this.label_thread_unit.Name = "label_thread_unit";
+            this.label_thread_unit.Size = new System.Drawing.Size(20, 15);
+            this.label_thread_unit.TabIndex = 60;
+            this.label_thread_unit.Text = "个";
             // 
             // groupBox_side
             // 
+            this.groupBox_side.Controls.Add(this.groupBox_capture_mouse);
             this.groupBox_side.Controls.Add(this.groupBox5);
             this.groupBox_side.Controls.Add(this.groupBox4);
             this.groupBox_side.Controls.Add(this.groupBox3);
@@ -408,10 +438,35 @@
             this.groupBox_side.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox_side.Location = new System.Drawing.Point(3, 103);
             this.groupBox_side.Name = "groupBox_side";
-            this.groupBox_side.Size = new System.Drawing.Size(725, 248);
+            this.groupBox_side.Size = new System.Drawing.Size(725, 344);
             this.groupBox_side.TabIndex = 6;
             this.groupBox_side.TabStop = false;
             this.groupBox_side.Text = "识别设置";
+            // 
+            // groupBox_capture_mouse
+            // 
+            this.groupBox_capture_mouse.Controls.Add(this.button_capture_mouse_settings);
+            this.groupBox_capture_mouse.Controls.Add(this.label_capture_mode);
+            this.groupBox_capture_mouse.Controls.Add(this.comboBox_capture_mode);
+            this.groupBox_capture_mouse.Controls.Add(this.label_mouse_mode);
+            this.groupBox_capture_mouse.Controls.Add(this.comboBox_mouse_mode);
+            this.groupBox_capture_mouse.Location = new System.Drawing.Point(6, 262);
+            this.groupBox_capture_mouse.Name = "groupBox_capture_mouse";
+            this.groupBox_capture_mouse.Size = new System.Drawing.Size(709, 56);
+            this.groupBox_capture_mouse.TabIndex = 40;
+            this.groupBox_capture_mouse.TabStop = false;
+            this.groupBox_capture_mouse.Text = "截图与鼠标";
+            // 
+            // button_capture_mouse_settings
+            // 
+            this.button_capture_mouse_settings.Location = new System.Drawing.Point(288, 19);
+            this.button_capture_mouse_settings.Name = "button_capture_mouse_settings";
+            this.button_capture_mouse_settings.Size = new System.Drawing.Size(120, 28);
+            this.button_capture_mouse_settings.TabIndex = 3;
+            this.button_capture_mouse_settings.TabStop = false;
+            this.button_capture_mouse_settings.Text = "设置";
+            this.button_capture_mouse_settings.UseVisualStyleBackColor = true;
+            this.button_capture_mouse_settings.Click += new System.EventHandler(this.button_capture_mouse_settings_Click);
             // 
             // groupBox5
             // 
@@ -421,14 +476,14 @@
             this.groupBox5.Controls.Add(this.button_go_immediately);
             this.groupBox5.Location = new System.Drawing.Point(235, 24);
             this.groupBox5.Name = "groupBox5";
-            this.groupBox5.Size = new System.Drawing.Size(143, 194);
+            this.groupBox5.Size = new System.Drawing.Size(143, 232);
             this.groupBox5.TabIndex = 34;
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "连线操作";
             // 
             // button_stop_detection
             // 
-            this.button_stop_detection.Location = new System.Drawing.Point(24, 103);
+            this.button_stop_detection.Location = new System.Drawing.Point(24, 128);
             this.button_stop_detection.Name = "button_stop_detection";
             this.button_stop_detection.Size = new System.Drawing.Size(98, 28);
             this.button_stop_detection.TabIndex = 3;
@@ -439,7 +494,7 @@
             // 
             // button_start_from_oppo
             // 
-            this.button_start_from_oppo.Location = new System.Drawing.Point(24, 69);
+            this.button_start_from_oppo.Location = new System.Drawing.Point(24, 82);
             this.button_start_from_oppo.Name = "button_start_from_oppo";
             this.button_start_from_oppo.Size = new System.Drawing.Size(98, 28);
             this.button_start_from_oppo.TabIndex = 2;
@@ -450,7 +505,7 @@
             // 
             // button_start_from_self
             // 
-            this.button_start_from_self.Location = new System.Drawing.Point(24, 35);
+            this.button_start_from_self.Location = new System.Drawing.Point(24, 36);
             this.button_start_from_self.Name = "button_start_from_self";
             this.button_start_from_self.Size = new System.Drawing.Size(98, 28);
             this.button_start_from_self.TabIndex = 1;
@@ -461,7 +516,7 @@
             // 
             // button_go_immediately
             // 
-            this.button_go_immediately.Location = new System.Drawing.Point(24, 137);
+            this.button_go_immediately.Location = new System.Drawing.Point(24, 174);
             this.button_go_immediately.Name = "button_go_immediately";
             this.button_go_immediately.Size = new System.Drawing.Size(98, 28);
             this.button_go_immediately.TabIndex = 14;
@@ -474,16 +529,12 @@
             // 
             this.groupBox4.Controls.Add(this.groupBox11);
             this.groupBox4.Controls.Add(this.checkBox_auto_go);
-            this.groupBox4.Controls.Add(this.checkBox_universal_mode);
             this.groupBox4.Controls.Add(this.checkBox_debug);
             this.groupBox4.Controls.Add(this.checkBox_analyze_mode);
-            this.groupBox4.Controls.Add(this.checkBox_universal_mouse);
             this.groupBox4.Controls.Add(this.checkBox_auto_click);
-            this.groupBox4.Controls.Add(this.label2b);
-            this.groupBox4.Controls.Add(this.comboBox_yolo_models);
             this.groupBox4.Location = new System.Drawing.Point(6, 24);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(223, 194);
+            this.groupBox4.Size = new System.Drawing.Size(223, 232);
             this.groupBox4.TabIndex = 32;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "连线设置";
@@ -493,7 +544,7 @@
             this.groupBox11.Controls.Add(this.label1);
             this.groupBox11.Controls.Add(this.numericUpDown_stop_score);
             this.groupBox11.Controls.Add(this.checkBox_stop_when_mate);
-            this.groupBox11.Location = new System.Drawing.Point(12, 128);
+            this.groupBox11.Location = new System.Drawing.Point(12, 123);
             this.groupBox11.Name = "groupBox11";
             this.groupBox11.Size = new System.Drawing.Size(135, 56);
             this.groupBox11.TabIndex = 36;
@@ -562,18 +613,28 @@
             this.checkBox_auto_go.UseVisualStyleBackColor = true;
             this.checkBox_auto_go.CheckedChanged += new System.EventHandler(this.checkBox_auto_go_CheckedChanged);
             // 
-            // checkBox_universal_mode
+            // label_capture_mode
             // 
-            this.checkBox_universal_mode.AccessibleDescription = "";
-            this.checkBox_universal_mode.AutoSize = true;
-            this.checkBox_universal_mode.Location = new System.Drawing.Point(15, 60);
-            this.checkBox_universal_mode.Name = "checkBox_universal_mode";
-            this.checkBox_universal_mode.Size = new System.Drawing.Size(89, 19);
-            this.checkBox_universal_mode.TabIndex = 16;
-            this.checkBox_universal_mode.Tag = "";
-            this.checkBox_universal_mode.Text = "前台截图";
-            this.checkBox_universal_mode.UseVisualStyleBackColor = true;
-            this.checkBox_universal_mode.CheckedChanged += new System.EventHandler(this.checkBox_universal_mode_CheckedChanged);
+            this.label_capture_mode.AutoSize = true;
+            this.label_capture_mode.Location = new System.Drawing.Point(15, 24);
+            this.label_capture_mode.Name = "label_capture_mode";
+            this.label_capture_mode.Size = new System.Drawing.Size(32, 15);
+            this.label_capture_mode.TabIndex = 16;
+            this.label_capture_mode.Text = "截图";
+            // 
+            // comboBox_capture_mode
+            // 
+            this.comboBox_capture_mode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox_capture_mode.FormattingEnabled = true;
+            this.comboBox_capture_mode.Items.AddRange(new object[] {
+            "前台",
+            "后台"});
+            this.comboBox_capture_mode.Location = new System.Drawing.Point(52, 20);
+            this.comboBox_capture_mode.Name = "comboBox_capture_mode";
+            this.comboBox_capture_mode.Size = new System.Drawing.Size(70, 23);
+            this.comboBox_capture_mode.TabIndex = 17;
+            this.comboBox_capture_mode.TabStop = false;
+            this.comboBox_capture_mode.SelectedIndexChanged += new System.EventHandler(this.comboBox_capture_mode_SelectedIndexChanged);
             // 
             // checkBox_debug
             // 
@@ -601,18 +662,28 @@
             this.checkBox_analyze_mode.UseVisualStyleBackColor = true;
             this.checkBox_analyze_mode.CheckedChanged += new System.EventHandler(this.checkBox_analyze_mode_CheckedChanged);
             // 
-            // checkBox_universal_mouse
+            // label_mouse_mode
             // 
-            this.checkBox_universal_mouse.AccessibleDescription = "";
-            this.checkBox_universal_mouse.AutoSize = true;
-            this.checkBox_universal_mouse.Location = new System.Drawing.Point(15, 85);
-            this.checkBox_universal_mouse.Name = "checkBox_universal_mouse";
-            this.checkBox_universal_mouse.Size = new System.Drawing.Size(89, 19);
-            this.checkBox_universal_mouse.TabIndex = 24;
-            this.checkBox_universal_mouse.Tag = "";
-            this.checkBox_universal_mouse.Text = "前台鼠标";
-            this.checkBox_universal_mouse.UseVisualStyleBackColor = true;
-            this.checkBox_universal_mouse.CheckedChanged += new System.EventHandler(this.checkBox_universal_mouse_CheckedChanged);
+            this.label_mouse_mode.AutoSize = true;
+            this.label_mouse_mode.Location = new System.Drawing.Point(150, 24);
+            this.label_mouse_mode.Name = "label_mouse_mode";
+            this.label_mouse_mode.Size = new System.Drawing.Size(32, 15);
+            this.label_mouse_mode.TabIndex = 18;
+            this.label_mouse_mode.Text = "鼠标";
+            // 
+            // comboBox_mouse_mode
+            // 
+            this.comboBox_mouse_mode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox_mouse_mode.FormattingEnabled = true;
+            this.comboBox_mouse_mode.Items.AddRange(new object[] {
+            "前台",
+            "后台"});
+            this.comboBox_mouse_mode.Location = new System.Drawing.Point(187, 20);
+            this.comboBox_mouse_mode.Name = "comboBox_mouse_mode";
+            this.comboBox_mouse_mode.Size = new System.Drawing.Size(70, 23);
+            this.comboBox_mouse_mode.TabIndex = 19;
+            this.comboBox_mouse_mode.TabStop = false;
+            this.comboBox_mouse_mode.SelectedIndexChanged += new System.EventHandler(this.comboBox_mouse_mode_SelectedIndexChanged);
             // 
             // checkBox_auto_click
             // 
@@ -634,7 +705,7 @@
             this.groupBox3.Controls.Add(this.button_screenshot);
             this.groupBox3.Location = new System.Drawing.Point(528, 24);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(187, 194);
+            this.groupBox3.Size = new System.Drawing.Size(187, 232);
             this.groupBox3.TabIndex = 31;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "方案管理";
@@ -697,21 +768,23 @@
             // 
             this.groupBox2.Controls.Add(this.label3);
             this.groupBox2.Controls.Add(this.label2);
+            this.groupBox2.Controls.Add(this.label2b);
             this.groupBox2.Controls.Add(this.comboBox_detect_mode);
+            this.groupBox2.Controls.Add(this.comboBox_yolo_models);
             this.groupBox2.Controls.Add(this.button_advance_settings);
             this.groupBox2.Controls.Add(this.numericUpDown_scale_factor);
             this.groupBox2.Controls.Add(this.button_redetect);
             this.groupBox2.Location = new System.Drawing.Point(384, 24);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(138, 194);
+            this.groupBox2.Size = new System.Drawing.Size(138, 232);
             this.groupBox2.TabIndex = 30;
             this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "识别设置";
+            this.groupBox2.Text = "识别参数";
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(9, 71);
+            this.label3.Location = new System.Drawing.Point(8, 110);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(52, 15);
             this.label3.TabIndex = 36;
@@ -720,7 +793,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(8, 27);
+            this.label2.Location = new System.Drawing.Point(8, 24);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(67, 15);
             this.label2.TabIndex = 23;
@@ -728,12 +801,12 @@
             // 
             // button_advance_settings
             // 
-            this.button_advance_settings.Location = new System.Drawing.Point(11, 120);
+            this.button_advance_settings.Location = new System.Drawing.Point(11, 158);
             this.button_advance_settings.Name = "button_advance_settings";
             this.button_advance_settings.Size = new System.Drawing.Size(119, 28);
             this.button_advance_settings.TabIndex = 35;
             this.button_advance_settings.TabStop = false;
-            this.button_advance_settings.Text = "识别高级设置";
+            this.button_advance_settings.Text = "识别设置";
             this.button_advance_settings.UseVisualStyleBackColor = true;
             this.button_advance_settings.Click += new System.EventHandler(this.button_advance_settings_Click);
             // 
@@ -745,7 +818,7 @@
             0,
             0,
             131072});
-            this.numericUpDown_scale_factor.Location = new System.Drawing.Point(11, 89);
+            this.numericUpDown_scale_factor.Location = new System.Drawing.Point(12, 128);
             this.numericUpDown_scale_factor.Maximum = new decimal(new int[] {
             4,
             0,
@@ -774,7 +847,7 @@
             this.comboBox_detect_mode.Items.AddRange(new object[] {
             "象棋",
             "揭棋"});
-            this.comboBox_detect_mode.Location = new System.Drawing.Point(12, 45);
+            this.comboBox_detect_mode.Location = new System.Drawing.Point(12, 41);
             this.comboBox_detect_mode.Name = "comboBox_detect_mode";
             this.comboBox_detect_mode.Size = new System.Drawing.Size(118, 23);
             this.comboBox_detect_mode.TabIndex = 21;
@@ -784,7 +857,7 @@
             // label2b
             // 
             this.label2b.AutoSize = true;
-            this.label2b.Location = new System.Drawing.Point(15, 108);
+            this.label2b.Location = new System.Drawing.Point(8, 66);
             this.label2b.Name = "label2b";
             this.label2b.Size = new System.Drawing.Size(52, 15);
             this.label2b.TabIndex = 39;
@@ -793,16 +866,16 @@
             // comboBox_yolo_models
             // 
             this.comboBox_yolo_models.FormattingEnabled = true;
-            this.comboBox_yolo_models.Location = new System.Drawing.Point(73, 104);
+            this.comboBox_yolo_models.Location = new System.Drawing.Point(12, 84);
             this.comboBox_yolo_models.Name = "comboBox_yolo_models";
-            this.comboBox_yolo_models.Size = new System.Drawing.Size(136, 23);
+            this.comboBox_yolo_models.Size = new System.Drawing.Size(118, 23);
             this.comboBox_yolo_models.TabIndex = 40;
             this.comboBox_yolo_models.TabStop = false;
             this.comboBox_yolo_models.SelectedIndexChanged += new System.EventHandler(this.comboBox_yolo_models_SelectedIndexChanged);
             // 
             // button_redetect
             // 
-            this.button_redetect.Location = new System.Drawing.Point(11, 154);
+            this.button_redetect.Location = new System.Drawing.Point(11, 190);
             this.button_redetect.Name = "button_redetect";
             this.button_redetect.Size = new System.Drawing.Size(119, 28);
             this.button_redetect.TabIndex = 7;
@@ -810,6 +883,57 @@
             this.button_redetect.Text = "重新检测";
             this.button_redetect.UseVisualStyleBackColor = true;
             this.button_redetect.Click += new System.EventHandler(this.button_redetect_Click);
+            // 
+            // groupBox_log
+            // 
+            this.groupBox_log.Controls.Add(this.tableLayoutPanel_think_detail);
+            this.groupBox_log.Controls.Add(this.checkBox_auto_scroll);
+            this.groupBox_log.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.groupBox_log.Location = new System.Drawing.Point(3, 397);
+            this.groupBox_log.Name = "groupBox_log";
+            this.groupBox_log.Size = new System.Drawing.Size(725, 264);
+            this.groupBox_log.TabIndex = 31;
+            this.groupBox_log.TabStop = false;
+            this.groupBox_log.Text = "引擎输出";
+            // 
+            // panel_trend
+            // 
+            this.panel_trend.Controls.Add(this.pictureBox_trend);
+            this.panel_trend.Controls.Add(this.comboBox_trend_mode);
+            this.panel_trend.Dock = System.Windows.Forms.DockStyle.Right;
+            this.panel_trend.Location = new System.Drawing.Point(0, 0);
+            this.panel_trend.Name = "panel_trend";
+            this.panel_trend.Padding = new System.Windows.Forms.Padding(3);
+            this.panel_trend.Size = new System.Drawing.Size(216, 192);
+            this.panel_trend.TabIndex = 40;
+            this.panel_trend.SizeChanged += new System.EventHandler(this.panel_trend_SizeChanged);
+            this.panel_trend.Layout += new System.Windows.Forms.LayoutEventHandler(this.panel_trend_Layout);
+            // 
+            // comboBox_trend_mode
+            // 
+            this.comboBox_trend_mode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox_trend_mode.FormattingEnabled = true;
+            this.comboBox_trend_mode.Items.AddRange(new object[] {
+            "分数",
+            "胜率"});
+            this.comboBox_trend_mode.Margin = new System.Windows.Forms.Padding(0, 0, 0, 4);
+            this.comboBox_trend_mode.Location = new System.Drawing.Point(3, 3);
+            this.comboBox_trend_mode.Name = "comboBox_trend_mode";
+            this.comboBox_trend_mode.Size = new System.Drawing.Size(210, 23);
+            this.comboBox_trend_mode.TabIndex = 41;
+            this.comboBox_trend_mode.TabStop = false;
+            this.comboBox_trend_mode.SelectedIndexChanged += new System.EventHandler(this.comboBox_trend_mode_SelectedIndexChanged);
+            // 
+            // pictureBox_trend
+            // 
+            this.pictureBox_trend.BackColor = System.Drawing.Color.White;
+            this.pictureBox_trend.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pictureBox_trend.Location = new System.Drawing.Point(3, 29);
+            this.pictureBox_trend.Name = "pictureBox_trend";
+            this.pictureBox_trend.Size = new System.Drawing.Size(210, 160);
+            this.pictureBox_trend.TabIndex = 42;
+            this.pictureBox_trend.TabStop = false;
+            this.pictureBox_trend.SizeChanged += new System.EventHandler(this.pictureBox_trend_SizeChanged);
             // 
             // tableLayoutPanel_think_detail
             // 
@@ -933,7 +1057,7 @@
             // 
             this.toolStripStatusLabel_info.Name = "toolStripStatusLabel_info";
             this.toolStripStatusLabel_info.Size = new System.Drawing.Size(424, 20);
-            this.toolStripStatusLabel_info.Text = "象棋连线工具 By Vincentzyx 交流群: 829220986                     ";
+            this.toolStripStatusLabel_info.Text = "揭棋byGodGun968";
             // 
             // label_detection_status
             // 
@@ -973,13 +1097,11 @@
             this.tableLayoutPanel_engine.PerformLayout();
             this.groupBox_engine_basic.ResumeLayout(false);
             this.groupBox_engine_basic.PerformLayout();
-            this.groupBox10.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_engine_depth)).EndInit();
-            this.groupBox7.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_hash)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_thread_count)).EndInit();
-            this.groupBox6.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_step_time)).EndInit();
             this.groupBox_side.ResumeLayout(false);
+            this.groupBox_capture_mouse.ResumeLayout(false);
+            this.groupBox_capture_mouse.PerformLayout();
             this.groupBox5.ResumeLayout(false);
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
@@ -991,6 +1113,10 @@
             this.groupBox2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_scale_factor)).EndInit();
             this.tableLayoutPanel_think_detail.ResumeLayout(false);
+            this.groupBox_log.ResumeLayout(false);
+            this.groupBox_log.PerformLayout();
+            this.panel_trend.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox_trend)).EndInit();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.statusStrip.ResumeLayout(false);
@@ -1011,12 +1137,19 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_engine;
         private System.Windows.Forms.GroupBox groupBox_engine_basic;
         private System.Windows.Forms.Label label_engine;
-        private System.Windows.Forms.NumericUpDown numericUpDown_step_time;
+        private System.Windows.Forms.Label label_hash;
+        private System.Windows.Forms.Label label_hash_unit;
+        private System.Windows.Forms.Label label_thread_count;
+        private System.Windows.Forms.NumericUpDown numericUpDown_thread_count;
+        private System.Windows.Forms.Label label_thread_unit;
+        private System.Windows.Forms.NumericUpDown numericUpDown_hash;
+        private System.Windows.Forms.CheckBox checkBox_ponder;
+        private System.Windows.Forms.CheckBox checkBox_engine_log;
+        private System.Windows.Forms.Button button_time_settings;
         private System.Windows.Forms.ComboBox comboBox_engine;
         private System.Windows.Forms.CheckBox checkBox_auto_go;
         private System.Windows.Forms.GroupBox groupBox_side;
         private System.Windows.Forms.Button button_redetect;
-        private System.Windows.Forms.NumericUpDown numericUpDown_thread_count;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_detection;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.NumericUpDown numericUpDown_scale_factor;
@@ -1026,13 +1159,17 @@
         private System.Windows.Forms.OpenFileDialog openFileDialog_engine;
         private System.Windows.Forms.Button button_get_hwnd;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel_pad;
-        private System.Windows.Forms.CheckBox checkBox_universal_mode;
+        private System.Windows.Forms.Label label_capture_mode;
+        private System.Windows.Forms.ComboBox comboBox_capture_mode;
+        private System.Windows.Forms.GroupBox groupBox_capture_mouse;
+        private System.Windows.Forms.Button button_capture_mouse_settings;
         private System.Windows.Forms.CheckBox checkBox_debug;
         private System.Windows.Forms.ComboBox comboBox_solution;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_copy_fen;
         private System.Windows.Forms.CheckBox checkBox_analyze_mode;
         private System.Windows.Forms.ComboBox comboBox_yolo_models;
-        private System.Windows.Forms.CheckBox checkBox_universal_mouse;
+        private System.Windows.Forms.Label label_mouse_mode;
+        private System.Windows.Forms.ComboBox comboBox_mouse_mode;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel_info;
         private System.Windows.Forms.Button button_screenshot;
         private System.Windows.Forms.CheckBox checkBox_auto_click;
@@ -1050,15 +1187,15 @@
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.Button button_stop_detection;
         private System.Windows.Forms.Button button_start_from_oppo;
-        private System.Windows.Forms.GroupBox groupBox7;
-        private System.Windows.Forms.GroupBox groupBox6;
-        private System.Windows.Forms.GroupBox groupBox10;
-        private System.Windows.Forms.NumericUpDown numericUpDown_engine_depth;
         private System.Windows.Forms.GroupBox groupBox11;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.NumericUpDown numericUpDown_stop_score;
         private System.Windows.Forms.Button button_advance_settings;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_think_detail;
+        private System.Windows.Forms.GroupBox groupBox_log;
+        private System.Windows.Forms.Panel panel_trend;
+        private System.Windows.Forms.ComboBox comboBox_trend_mode;
+        private System.Windows.Forms.PictureBox pictureBox_trend;
         private System.Windows.Forms.RichTextBox textBox_engine_log;
         private System.Windows.Forms.ToolStripStatusLabel label_detection_status;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip_board;

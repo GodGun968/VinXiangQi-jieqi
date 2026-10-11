@@ -47,7 +47,9 @@ namespace VinXiangQi
                 EngineSettings settings = new EngineSettings();
                 settings.ExePath = path;
                 EngineHelper engine = new EngineHelper(settings.ExePath, settings.Configs);
-                engine.Init();
+                UseWaitCursor = true;   // 引擎握手需要等待（最长约 15 秒）：显示等待光标，避免"卡住"观感
+                try { engine.Init(); }
+                finally { UseWaitCursor = false; }
                 string[] fileNameParts = settings.ExePath.Split('\\').Last().Split('.');
                 if (fileNameParts[fileNameParts.Length - 1] != "exe")
                 {
@@ -106,7 +108,9 @@ namespace VinXiangQi
                 string key = ((ListViewItem)listView_engine_list.SelectedItems[0]).Text;
                 EngineSettings settings = Mainform.Settings.EngineList[key];
                 EngineHelper engine = new EngineHelper(settings.ExePath, settings.Configs);
-                engine.Init();
+                UseWaitCursor = true;
+                try { engine.Init(); }
+                finally { UseWaitCursor = false; }
                 if (!engine.Initialized) return;
                 EngineSettingsForm engineSettingsForm = new EngineSettingsForm(engine, settings);
                 engineSettingsForm.StartPosition = FormStartPosition.CenterParent;
@@ -126,7 +130,9 @@ namespace VinXiangQi
                 string key = ((ListViewItem)listView_engine_list.SelectedItems[0]).Text;
                 EngineSettings settings = Mainform.Settings.EngineList[key];
                 EngineHelper engine = new EngineHelper(settings.ExePath, settings.Configs);
-                engine.Init();
+                UseWaitCursor = true;
+                try { engine.Init(); }
+                finally { UseWaitCursor = false; }
                 if (!engine.Initialized) return;
                 EngineInfoEditForm engineInfoEditForm = new EngineInfoEditForm(key, settings.Author, settings.ExePath);
                 engineInfoEditForm.ShowDialog();

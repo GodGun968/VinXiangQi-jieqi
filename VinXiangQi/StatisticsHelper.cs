@@ -119,9 +119,17 @@ namespace VinXiangQi
             {
                 try
                 {
-                    WebClient wc = new WebClient();
                     Debug.WriteLine($"Running on {MachineCode.GetMachineCodeString()}\nVersion {Mainform.Version}");
-                    wc.DownloadString("http://xq.vcccz.com/statistics.php?machine=" + MachineCode.GetMachineCodeString() + "&version=" + Mainform.Version);
+                    // 带超时的上报请求，避免网络不通时线程长期挂起
+                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://xq.vcccz.com/statistics.php?machine=" + MachineCode.GetMachineCodeString() + "&version=" + Mainform.Version);
+                    request.Timeout = 8000;
+                    request.ReadWriteTimeout = 8000;
+                    using (WebResponse response = request.GetResponse())
+                    using (Stream stream = response.GetResponseStream())
+                    using (StreamReader reader = new StreamReader(stream))
+                    {
+                        reader.ReadToEnd();
+                    }
                 }
                 catch (Exception ex)
                 {
