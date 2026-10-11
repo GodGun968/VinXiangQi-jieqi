@@ -1,6 +1,11 @@
 # VinXiangQi — GitHub Actions 构建工作流
 #
-# 只构建程序本体；产物不包含任何 .onnx 模型文件：
+# 两个任务（互相独立）：
+#   build      —— msbuild Release 构建 + 产物打包（不含任何模型与引擎文件）。
+#   regression —— 与本地同一条路径：拉取固定版本编译工具链后执行
+#                 scripts/build_vinxq.sh test（编译 + harness 回归 + 揭棋合法性回归）。
+#
+# 产物不包含任何 .onnx 模型文件：
 #   普通象棋：小模型.onnx / 中模型.onnx / 万能带旋转.onnx
 #   揭棋    ：jieqi.onnx（需 opset15 / IR8 版本，旧版 ONNX Runtime 才能加载）
 #   引擎 exe 同样手动放入 Engines\，并在程序设置里指向它。
@@ -19,13 +24,13 @@ jobs:
     runs-on: windows-2022
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v3
 
       - name: Setup NuGet
-        uses: nuget/setup-nuget@v3
+        uses: nuget/setup-nuget@v4
 
       # nuget restore 自动还原全部依赖；Prefer32Bit=true 会自动带入 x86 原生 onnxruntime（该组合实测可推理 jieqi.onnx）
       - name: NuGet restore
@@ -68,3 +73,52 @@ jobs:
           name: VinXiangQi-Release
           path: dist/VinXiangQi
           if-no-files-found: error
+
+  regression:
+    runs-on: windows-2022
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup NuGet
+        uses: nuget/setup-nuget@v4
+
+      # 回归用的仓库 packages/（csproj 引用的运行库），先还原
+      - name: NuGet restore
+        run: nuget restore VinXiangQi.sln
+
+      # 拉取编译工具链（固定版本），排成 scripts/build_vinxq.sh 认的目录布局：
+      #   .tools/roslyn311/tools/csc.exe
+      #   .tools/refasm48/build/.NETFramework/v4.8/...
+      - name: Fetch build toolchain (Roslyn + net48 reference assemblies)
+        shell: bash
+        run: |
+          set -e
+          mkdir -p .tools
+          curl -sSL -o .tools/nuget.exe https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
+          ./.tools/nuget.exe install Microsoft.Net.Compilers -Version 3.11.0 -OutputDirectory .tools -ExcludeVersion -NonInteractive
+          ./.tools/nuget.exe install Microsoft.NETFramework.ReferenceAssemblies.net48 -Version 1.0.3 -OutputDirectory .tools -ExcludeVersion -NonInteractive
+          mv .tools/Microsoft.Net.Compilers .tools/roslyn311
+          mv .tools/Microsoft.NETFramework.ReferenceAssemblies.net48 .tools/refasm48
+          ls -la .tools/roslyn311/tools/csc.exe \
+                 .tools/refasm48/build/.NETFramework/v4.8/mscorlib.dll \
+                 .tools/refasm48/build/.NETFramework/v4.8/Facades/netstandard.dll
+
+      # 与本地同一条路径：编译（0 错误）+ harness 回归 + 揭棋合法性回归
+      - name: Compile + regression (scripts/build_vinxq.sh test)
+        shell: bash
+        run: |
+          set -e
+          W="$(cygpath -m "$PWD")"
+          export VXQ_TOOLS="$W/.tools"
+          export VXQ_OUT="$W/.ci_out"
+          export VXQ_NETSTD="$W/.tools/refasm48/build/.NETFramework/v4.8/Facades/netstandard.dll"
+          bash scripts/build_vinxq.sh test
+
+      - name: Upload regression logs (only on failure)
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: regression-logs
+          path: .ci_out/logs
+          if-no-files-found: ignore
